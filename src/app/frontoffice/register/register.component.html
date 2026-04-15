@@ -1,0 +1,251 @@
+<canvas #canvasEl class="canvas"></canvas>
+
+<div class="container">
+  <div class="header">
+    <button
+      class="theme-btn"
+      (click)="toggleTheme()"
+      [title]="isDark ? 'Light mode' : 'Dark mode'"
+    >
+      <svg *ngIf="isDark" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="5" />
+        <path
+          d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m6.08 0l4.24-4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m6.08 0l4.24 4.24M19 12h6"
+        />
+      </svg>
+      <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+    </button>
+    <a href="/" class="back-link">← Back to home</a>
+  </div>
+
+  <!-- ── Step 1: Role Selection ──────────────────────────── -->
+  <div *ngIf="step === 'role'" class="card role-card" @cardEnter>
+    <h1 class="title">Get Started</h1>
+    <p class="subtitle">Choose your role on Matchy</p>
+
+    <div class="role-grid">
+      <!-- CLIENT Card -->
+      <div
+        class="role-option"
+        [class.selected]="selectedRole === 'CLIENT'"
+        (click)="selectRole('CLIENT')"
+      >
+        <div class="role-icon">💼</div>
+        <h3 class="role-title">Client</h3>
+        <p class="role-desc">Post projects & hire freelancers</p>
+        <ul class="perks">
+          <li>✓ Post unlimited projects</li>
+          <li>✓ Find skilled freelancers</li>
+          <li>✓ Secure escrow system</li>
+        </ul>
+      </div>
+
+      <!-- FREELANCER Card -->
+      <div
+        class="role-option"
+        [class.selected]="selectedRole === 'FREELANCER'"
+        (click)="selectRole('FREELANCER')"
+      >
+        <div class="role-icon">⚙️</div>
+        <h3 class="role-title">Freelancer</h3>
+        <p class="role-desc">Earn by completing projects</p>
+        <ul class="perks">
+          <li>✓ Browse available projects</li>
+          <li>✓ Build your portfolio</li>
+          <li>✓ Get verified badges</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 2: Registration Form ──────────────────────── -->
+  <div *ngIf="step === 'form'" class="card form-card" @slideUp>
+    <div class="form-header">
+      <button class="back-btn" (click)="goBackToRole()">← Change role</button>
+      <div class="role-badge" [ngClass]="selectedRole?.toLowerCase()">
+        {{ selectedRole }}
+      </div>
+    </div>
+
+    <h2 class="title">Create your account</h2>
+
+    <!-- Error message -->
+    <div *ngIf="error" class="error-box shake">❌ {{ error }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+      <!-- First & Last Name (2 columns) -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name *</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            [class.invalid]="isInvalid('firstName')"
+            placeholder="John"
+          />
+          <small *ngIf="isInvalid('firstName')" class="error"
+            >Required, min 2 chars</small
+          >
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            [class.invalid]="isInvalid('lastName')"
+            placeholder="Doe"
+          />
+          <small *ngIf="isInvalid('lastName')" class="error"
+            >Required, min 2 chars</small
+          >
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          [class.invalid]="isInvalid('email')"
+          placeholder="john@example.com"
+        />
+        <small *ngIf="isInvalid('email')" class="error"
+          >Valid email required</small
+        >
+      </div>
+
+      <!-- Password with toggle -->
+      <div class="form-group">
+        <label for="password">Password *</label>
+        <div class="password-group">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            [class.invalid]="isInvalid('password')"
+            placeholder="Min 6 characters"
+          />
+          <button
+            type="button"
+            class="toggle-pw"
+            (click)="togglePassword()"
+            [title]="showPassword ? 'Hide' : 'Show'"
+          >
+            {{ showPassword ? "👁️‍🗨️" : "👁️" }}
+          </button>
+        </div>
+        <small *ngIf="isInvalid('password')" class="error"
+          >Required, min 6 chars</small
+        >
+
+        <!-- Password Strength Meter -->
+        <div class="strength-meter" *ngIf="form.get('password')?.value">
+          <div class="strength-bars">
+            <div
+              class="bar"
+              [ngClass]="{ filled: passwordStrength.score >= 1 }"
+              [style.background]="
+                passwordStrength.score >= 1
+                  ? passwordStrength.color
+                  : 'rgba(123, 159, 255, 0.15)'
+              "
+            ></div>
+            <div
+              class="bar"
+              [ngClass]="{ filled: passwordStrength.score >= 2 }"
+              [style.background]="
+                passwordStrength.score >= 2
+                  ? passwordStrength.color
+                  : 'rgba(123, 159, 255, 0.15)'
+              "
+            ></div>
+            <div
+              class="bar"
+              [ngClass]="{ filled: passwordStrength.score >= 3 }"
+              [style.background]="
+                passwordStrength.score >= 3
+                  ? passwordStrength.color
+                  : 'rgba(123, 159, 255, 0.15)'
+              "
+            ></div>
+            <div
+              class="bar"
+              [ngClass]="{ filled: passwordStrength.score >= 4 }"
+              [style.background]="
+                passwordStrength.score >= 4
+                  ? passwordStrength.color
+                  : 'rgba(123, 159, 255, 0.15)'
+              "
+            ></div>
+            <div
+              class="bar"
+              [ngClass]="{ filled: passwordStrength.score >= 5 }"
+              [style.background]="
+                passwordStrength.score >= 5
+                  ? passwordStrength.color
+                  : 'rgba(123, 159, 255, 0.15)'
+              "
+            ></div>
+          </div>
+          <span class="strength-label" [style.color]="passwordStrength.color">
+            {{ passwordStrength.label }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input
+          id="location"
+          type="text"
+          formControlName="location"
+          placeholder="e.g., San Francisco, CA"
+        />
+      </div>
+
+      <!-- Skills (for Freelancers) -->
+      <div class="form-group" *ngIf="selectedRole === 'FREELANCER'">
+        <label for="skills">Skills (comma-separated)</label>
+        <input
+          id="skills"
+          type="text"
+          formControlName="skills"
+          placeholder="React, Node.js, Design, ..."
+        />
+      </div>
+
+      <!-- Bio -->
+      <div class="form-group">
+        <label for="bio">Bio / About</label>
+        <textarea
+          id="bio"
+          formControlName="bio"
+          rows="3"
+          placeholder="Tell us about yourself..."
+        ></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="form.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">Create Account</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+
+      <!-- Already have account? -->
+      <p class="login-link">
+        Already have an account? <a href="/login">Sign in</a>
+      </p>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,304 @@
+@startuml Content_Certification_Management
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam classBackgroundColor #F0F0F0
+skinparam classBorderColor #333333
+skinparam arrowColor #333333
+
+' ====== CORE ENTITIES ======
+
+class User {
+  -userId: string
+  -email: string
+  -firstName: string
+  -lastName: string
+  -role: UserRole
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +getProfile(): void
+  +updateProfile(data): void
+  +canAccessContent(contentId): boolean
+  +isCertificationValid(certId): boolean
+}
+
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+  FREELANCER
+}
+
+class Content {
+  -contentId: string
+  -title: string
+  -description: string
+  -type: ContentType
+  -difficulty: DifficultyLevel
+  -status: ContentStatus
+  -body: string
+  -tags: string[]
+  -thumbnail: string
+  -views: number
+  -rating: number
+  -createdBy: string
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +publish(): void
+  +archive(): void
+  +restore(): void
+  +updateMetadata(data): void
+  +getTranslations(): ContentTranslation[]
+}
+
+enum ContentType {
+  VIDEO
+  ARTICLE
+  QUIZ
+  RESOURCE
+  COURSE
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+class ContentTranslation {
+  -translationId: string
+  -contentId: string
+  -language: string
+  -title: string
+  -description: string
+  -body: string
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +update(data): void
+  +getContent(): Content
+}
+
+class Favorite {
+  -favoriteId: string
+  -userId: string
+  -contentId: string
+  -addedDate: Date
+  -notes: string
+  --
+  +remove(): void
+  +updateNotes(notes): void
+}
+
+class Assessment {
+  -assessmentId: string
+  -title: string
+  -description: string
+  -type: AssessmentType
+  -duration: number
+  -passingScore: number
+  -createdBy: string
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +getQuestions(): Question[]
+  +grade(answers): number
+  +isContentLinked(contentId): boolean
+}
+
+enum AssessmentType {
+  MCQ
+  TRUE_FALSE
+  SHORT_ANSWER
+  MIXED
+}
+
+class Question {
+  -questionId: string
+  -assessmentId: string
+  -text: string
+  -type: QuestionType
+  -options: string[]
+  -correctAnswer: string
+  -points: number
+  --
+  +validate(answer): boolean
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+class AssessmentAttempt {
+  -attemptId: string
+  -userId: string
+  -assessmentId: string
+  -score: number
+  -answers: Answer[]
+  -startTime: Date
+  -endTime: Date
+  -status: AttemptStatus
+  --
+  +submitAnswer(questionId, answer): void
+  +submit(): AssessmentResult
+  +getResult(): AssessmentResult
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+  PASSED
+  FAILED
+}
+
+class Answer {
+  -answerId: string
+  -questionId: string
+  -userAnswer: string
+  -isCorrect: boolean
+  -points: number
+}
+
+class Certification {
+  -certificationId: string
+  -name: string
+  -code: string
+  -description: string
+  -status: CertificationStatus
+  -passingScore: number
+  -duration: number
+  -validityPeriod: number
+  -maxAttempts: number
+  -assessmentId: string
+  -createdBy: string
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +issueCertificate(userId, score): CertificateData
+  +verifyPrerequisites(userId): boolean
+  +getPassRate(): number
+  +isExpired(userCertId): boolean
+}
+
+enum CertificationStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+class UserCertification {
+  -userCertId: string
+  -userId: string
+  -certificationId: string
+  -status: UserCertStatus
+  -score: number
+  -issuedDate: Date
+  -expirationDate: Date
+  -verificationToken: string
+  -verifiedBy: string
+  -verifiedAt: Date
+  --
+  +isValid(): boolean
+  +generateCertificateToken(): string
+  +verifyCertificate(token): boolean
+  +downloadPDF(): File
+  +renew(): void
+}
+
+enum UserCertStatus {
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+  REVOKED
+}
+
+' ====== RELATIONSHIPS ======
+
+User "1" -- "*" Content : creates
+User "1" -- "*" Favorite : marks_as_favorite
+User "1" -- "*" AssessmentAttempt : takes
+User "1" -- "*" UserCertification : earns
+
+Content "1" -- "*" ContentTranslation : has_translations
+Content "1" -- "*" Favorite : favorited_by
+Content "*" -- "1" Assessment : evaluated_by
+
+Assessment "1" -- "*" Question : contains
+Assessment "1" -- "*" AssessmentAttempt : evaluates
+Assessment "1" -- "1" Certification : required_for
+
+Certification "1" -- "*" UserCertification : issues
+Certification "1" -- "1" Assessment : linked_to
+
+AssessmentAttempt "1" -- "*" Answer : contains
+AssessmentAttempt "1" -- "1" UserCertification : generates
+
+UserCertification "1" -- "1" User : belongs_to
+UserCertification "1" -- "1" Certification : validates
+
+' ====== NOTES ======
+
+note right of User
+  User Roles:
+  - ADMIN: Gère contenu, certifications, utilisateurs
+  - INSTRUCTOR: Crée contenu, évaluations
+  - STUDENT: Accède au contenu, passe tests
+  - FREELANCER: Utilise pour compétences
+end note
+
+note right of Content
+  Cycle de contenu:
+  1. DRAFT → préparation
+  2. PUBLISHED → disponible
+  3. ARCHIVED → inactif
+  
+  Types: Video, Article, Quiz, Resource
+  Support multilingue via ContentTranslation
+end note
+
+note right of ContentTranslation
+  Contenu traduit
+  Supporte multiples langues
+  Lié à Content parent
+end note
+
+note right of Favorite
+  Permet aux utilisateurs
+  de marquer contenu favoris
+  Avec notes personnelles
+end note
+
+note right of Assessment
+  Évaluations liées au contenu
+  Types: MCQ, True/False, Short Answer
+  Utilisé pour la certification
+end note
+
+note right of Certification
+  Démarche complète:
+  1. User passe Assessment
+  2. Score validé vs passingScore
+  3. Certificate généré
+  4. Admin valide et signe
+  5. Status: COMPLETED/EXPIRED
+end note
+
+note right of UserCertification
+  Instance certification utilisateur
+  - score: résultat du test
+  - verificationToken: preuve (public)
+  - verifiedBy: admin qui a validé
+  - expirationDate: validité du cert
+end note
+
+@enduml
