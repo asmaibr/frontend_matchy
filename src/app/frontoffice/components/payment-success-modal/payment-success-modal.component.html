@@ -1,0 +1,33 @@
+<div class="success-overlay" *ngIf="isOpen" (click)="onClose()" role="presentation">
+  <div
+    class="success-card"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="success-title"
+    aria-describedby="success-desc">
+    <div class="check-wrap" aria-hidden="true">
+      <svg class="check-svg" viewBox="0 0 52 52">
+        <circle class="check-circle" cx="26" cy="26" r="24" fill="none" />
+        <path class="check-mark" fill="none" d="M14 27l8 8 16-16" />
+      </svg>
+    </div>
+    <h2 id="success-title">⏳ Paiement soumis — En attente de confirmation</h2>
+    <p id="success-desc">
+      Votre paiement a bien été reçu. Il est actuellement <strong>en attente de validation</strong> par notre équipe.
+    </p>
+    <p style="font-size:0.9rem; color:#f59e0b; margin-top:8px;">
+      📧 Vous recevrez un email de confirmation dès que votre paiement sera approuvé et votre abonnement activé.
+    </p>
+    <div class="detail-block">
+      <div class="detail-row"><span>Plan</span><strong>{{ plan }}</strong></div>
+      <div class="detail-row"><span>Montant</span><strong>{{ formatAmount() }}</strong></div>
+      <div class="detail-row"><span>Statut</span><strong style="color:#f59e0b;">EN ATTENTE</strong></div>
+      <div class="detail-row mono"><span>Référence</span><strong>{{ transactionRef }}</strong></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn ghost" (click)="onClose()">Fermer</button>
+      <button type="button" class="btn primary" (click)="goDashboard()">Retour au tableau de bord</button>
+    </div>
+  </div>
+</div>

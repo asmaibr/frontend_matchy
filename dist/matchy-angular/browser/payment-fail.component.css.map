@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;d110cccb2678f9922da4ee73197f35d29eb73ffad4ad45dd6dd725e8b44ce0ef;D:/4eme/PI-subscription/matchy-angular/src/app/frontoffice/payment-fail/payment-fail.component.ts"],
+  "sourcesContent": ["\n    .result-page { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#0f1117; }\n    .result-card { background:#1a1f2e; border:1px solid #ef4444; border-radius:20px; padding:40px; text-align:center; max-width:480px; color:#e5e7eb; }\n    .icon { font-size:3rem; margin-bottom:16px; }\n    h2 { color:#ef4444; margin:0 0 12px; }\n    p { color:#9ca3af; margin:8px 0; }\n    .info { background:rgba(239,68,68,0.1); padding:12px; border-radius:8px; color:#d1d5db; margin:16px 0; }\n    .btn-retry { background:#4f6ef7; color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; margin-top:8px; }\n  "],
+  "mappings": ";AACI,CAAC;AAAc,WAAQ;AAAM,mBAAgB;AAAQ,eAAY;AAAQ,cAAW;AAAO,cAAW;AAAS;AAC/G,CAAC;AAAc,cAAW;AAAS,UAAO,IAAI,MAAM;AAAS,iBAAc;AAAM,WAAQ;AAAM,cAAW;AAAQ,aAAU;AAAO,SAAM;AAAS;AAClJ,CAAC;AAAO,aAAU;AAAM,iBAAc;AAAM;AAC5C;AAAK,SAAM;AAAS,UAAO,EAAE,EAAE;AAAM;AACrC;AAAI,SAAM;AAAS,UAAO,IAAI;AAAG;AACjC,CAAC;AAAO,cAAW,KAAK,GAAG,EAAC,EAAE,EAAC,EAAE,EAAC;AAAM,WAAQ;AAAM,iBAAc;AAAK,SAAM;AAAS,UAAO,KAAK;AAAG;AACvG,CAAC;AAAY,cAAW;AAAS,SAAM;AAAM,UAAO;AAAM,WAAQ,KAAK;AAAM,iBAAc;AAAM,eAAY;AAAK,UAAO;AAAS,cAAW;AAAK;",
+  "names": []
+}

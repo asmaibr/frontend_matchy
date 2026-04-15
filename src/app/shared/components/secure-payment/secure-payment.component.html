@@ -1,0 +1,196 @@
+<div class="secure-payment-container">
+  <div class="payment-header">
+    <h2>🔒 Paiement Sécurisé</h2>
+    <p>Montant à payer: <strong>{{ amount }} {{ currency }}</strong></p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <!-- Promo Code Section -->
+  <div class="promo-code-section">
+    <h3>🎁 Code Promo</h3>
+    <div class="promo-input-group">
+      <input 
+        type="text" 
+        class="form-control promo-input" 
+        [(ngModel)]="promoCode"
+        placeholder="Entrez votre code promo (ex: MATCHY-ABC12345)"
+        [disabled]="isValidatingPromo">
+      <button 
+        type="button" 
+        class="btn btn-outline-primary"
+        (click)="validatePromoCode()"
+        [disabled]="!promoCode.trim() || isValidatingPromo">
+        <span *ngIf="!isValidatingPromo">Appliquer</span>
+        <span *ngIf="isValidatingPromo">Vérification...</span>
+      </button>
+      <button 
+        *ngIf="showPromoSuccess"
+        type="button" 
+        class="btn btn-outline-secondary"
+        (click)="clearPromoCode()">
+        ✕ Annuler
+      </button>
+    </div>
+
+    <!-- Promo Success Display -->
+    <div *ngIf="showPromoSuccess" class="promo-success-box">
+      <div class="promo-details">
+        <p class="promo-message">✅ {{ promoValidationResult?.message }}</p>
+        <div class="discount-breakdown">
+          <div class="discount-row">
+            <span>Montant original:</span>
+            <strong>{{ amount.toFixed(2) }} TND</strong>
+          </div>
+          <div class="discount-row discount-amount">
+            <span>Réduction ({{ promoValidationResult?.discountValue }}%):</span>
+            <strong>-{{ discountAmountTnd.toFixed(2) }} TND</strong>
+          </div>
+          <div class="discount-row total">
+            <span>Montant final:</span>
+            <strong class="final-amount">{{ discountedAmount.toFixed(2) }} TND</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Method Selection -->
+  <div class="payment-methods">
+    <h3>Méthode de paiement</h3>
+    <div class="methods-grid">
+      <div *ngFor="let method of paymentMethods" class="method-card" [class.active]="selectedMethod === method.value" (click)="selectPaymentMethod(method.value)">
+        <span class="method-icon">{{ method.icon }}</span>
+        <span class="method-label">{{ method.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Form -->
+  <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" class="payment-form">
+    <!-- Card Payment -->
+    <div *ngIf="selectedMethod === 'CARD'" class="method-form">
+      <h4>Détails de la carte</h4>
+      
+      <div class="form-group">
+        <label>Titulaire de la carte</label>
+        <input type="text" class="form-control" formControlName="cardholderName" placeholder="Nom complet sur la carte">
+        <div *ngIf="getFieldError('cardholderName')" class="error-text">
+          {{ getFieldError('cardholderName') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Numéro de carte</label>
+        <input type="text" class="form-control" formControlName="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" (input)="formatCardNumber($event)">
+        <div *ngIf="getFieldError('cardNumber')" class="error-text">
+          {{ getFieldError('cardNumber') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col">
+          <label>Expiration (MM/YY)</label>
+          <input type="text" class="form-control" formControlName="cardExpiry" placeholder="MM/YY" maxlength="5">
+          <div *ngIf="getFieldError('cardExpiry')" class="error-text">
+            {{ getFieldError('cardExpiry') }}
+          </div>
+        </div>
+        <div class="form-group col">
+          <label>CVV</label>
+          <input type="text" class="form-control" formControlName="cardCvv" placeholder="123" maxlength="4" (input)="formatCVV($event)">
+          <div *ngIf="getFieldError('cardCvv')" class="error-text">
+            {{ getFieldError('cardCvv') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PayPal Payment -->
+    <div *ngIf="selectedMethod === 'PAYPAL'" class="method-form">
+      <h4>Identifiant PayPal</h4>
+      <div class="form-group">
+        <label>Adresse e-mail PayPal</label>
+        <input type="email" class="form-control" formControlName="paypalEmail" placeholder="votre@paypal.com">
+        <div *ngIf="getFieldError('paypalEmail')" class="error-text">
+          {{ getFieldError('paypalEmail') }}
+        </div>
+      </div>
+      <p class="info-text">Vous serez redirigé vers PayPal pour compléter votre paiement.</p>
+    </div>
+
+    <!-- Mobile Payment -->
+    <div *ngIf="selectedMethod === 'MOBILE'" class="method-form">
+      <h4>Paiement Mobile</h4>
+      <div class="form-group">
+        <label>Opérateur</label>
+        <select class="form-control" formControlName="mobileProvider">
+          <option value="">Choisir un opérateur</option>
+          <option *ngFor="let provider of mobileProviders" [value]="provider">{{ provider }}</option>
+        </select>
+        <div *ngIf="getFieldError('mobileProvider')" class="error-text">
+          {{ getFieldError('mobileProvider') }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Numéro mobile</label>
+        <input type="text" class="form-control" formControlName="mobileNumber" placeholder="5XXXXXXXX" maxlength="8">
+        <div *ngIf="getFieldError('mobileNumber')" class="error-text">
+          {{ getFieldError('mobileNumber') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank Transfer -->
+    <div *ngIf="selectedMethod === 'BANK_TRANSFER'" class="method-form">
+      <h4>Virement Bancaire</h4>
+      <div class="form-group">
+        <label>Banque</label>
+        <input type="text" class="form-control" formControlName="bankName" placeholder="Nom de votre banque">
+        <div *ngIf="getFieldError('bankName')" class="error-text">
+          {{ getFieldError('bankName') }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>RIB / IBAN <span class="required">*</span></label>
+        <input 
+          type="text" 
+          class="form-control" 
+          formControlName="rib" 
+          placeholder="20 chiffres (ex: 12345678901234567890)"
+          maxlength="20">
+        <small class="form-text">Format: 20 chiffres uniquement</small>
+        <div *ngIf="getFieldError('rib')" class="error-text">
+          <span *ngIf="paymentForm.get('rib')?.hasError('required')">Le RIB/IBAN est requis</span>
+          <span *ngIf="paymentForm.get('rib')?.hasError('rib')">Le RIB doit contenir exactement 20 chiffres</span>
+          <span *ngIf="paymentForm.get('rib')?.hasError('maxlength')">Maximum 20 chiffres</span>
+        </div>
+      </div>
+      <p class="info-text">Vous recevrez les détails du virement après soumission.</p>
+    </div>
+
+    <!-- Security Info -->
+    <div class="security-info">
+      <p>🔐 Votre paiement est sécurisé. Aucune information sensible n'est stockée.</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isProcessing">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="paymentForm.invalid || isProcessing">
+        <span *ngIf="!isProcessing">Confirmer le paiement</span>
+        <span *ngIf="isProcessing">Traitement en cours...</span>
+      </button>
+    </div>
+  </form>
+</div>

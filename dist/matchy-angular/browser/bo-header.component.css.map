@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;eea46be7b58b9eadeba15a00a40c8acabe45311d0a0c3753667839e8a607eec0;D:/4eme/PI-subscription/matchy-angular/src/app/backoffice/layout/bo-header/bo-header.component.ts"],
+  "sourcesContent": ["\n    .bo-header {\n      display: flex; align-items: center; justify-content: space-between;\n      padding: 14px 28px;\n      background: var(--bo-bg-secondary);\n      border-bottom: 1px solid var(--bo-border);\n      gap: 16px;\n    }\n    .header-left { display: flex; gap: 8px; }\n    .btn-back {\n      padding: 7px 14px; font-size: 13px; font-weight: 500;\n      border: 1px solid var(--bo-border); border-radius: 6px;\n      background: transparent; color: var(--bo-text-secondary);\n      cursor: pointer; transition: all 0.2s; font-family: var(--font-body);\n      &:hover { border-color: var(--primary); color: var(--primary); }\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,WAAS;AAAM,eAAa;AAAQ,mBAAiB;AACrD,WAAS,KAAK;AACd,cAAY,IAAI;AAChB,iBAAe,IAAI,MAAM,IAAI;AAC7B,OAAK;AACP;AACA,CAAC;AAAc,WAAS;AAAM,OAAK;AAAK;AACxC,CAAC;AACC,WAAS,IAAI;AAAM,aAAW;AAAM,eAAa;AACjD,UAAQ,IAAI,MAAM,IAAI;AAAc,iBAAe;AACnD,cAAY;AAAa,SAAO,IAAI;AACpC,UAAQ;AAAS,cAAY,IAAI;AAAM,eAAa,IAAI;AACxD,GAAC;AAAS,kBAAc,IAAI;AAAY,WAAO,IAAI;AAAY;AACjE;",
+  "names": []
+}

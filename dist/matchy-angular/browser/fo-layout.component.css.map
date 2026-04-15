@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;f47ec7bf92bc82cfe3a7566e8b00da52346d71079b96c31b8b428c05f1d2b8f6;D:/4eme/PI-subscription/matchy-angular/src/app/frontoffice/layout/fo-layout.component.ts"],
+  "sourcesContent": ["\n    .fo-layout {\n      display: flex;\n      flex-direction: column;\n      min-height: 100vh;\n      background-color: var(--fo-bg-primary);\n    }\n    .fo-main {\n      flex: 1;\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,WAAS;AACT,kBAAgB;AAChB,cAAY;AACZ,oBAAkB,IAAI;AACxB;AACA,CAAC;AACC,QAAM;AACR;",
+  "names": []
+}
