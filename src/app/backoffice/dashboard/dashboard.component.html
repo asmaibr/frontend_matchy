@@ -1,0 +1,153 @@
+<div class="dashboard">
+
+  <!-- ══ HEADER ═══════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="h-left">
+      <p class="h-eyebrow">Matchy Platform</p>
+      <h1 class="page-title">Admin Dashboard</h1>
+      <p class="page-sub">Global overview · real-time stats</p>
+    </div>
+  </div>
+
+  <!-- ══ SKELETON ══════════════════════════════════════════ -->
+  <ng-container *ngIf="isLoading">
+    <div class="skel-kpis">
+      <div class="skel-card" *ngFor="let x of [1,2,3,4,5,6,7,8]"></div>
+    </div>
+    <div class="skel-charts">
+      <div class="skel-chart"></div>
+      <div class="skel-chart"></div>
+      <div class="skel-chart"></div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ══ KPI GRID ═══════════════════════════════════════ -->
+    <div class="kpi-grid">
+      <div class="kpi-card"
+           *ngFor="let s of stats; let i = index"
+           [class.ready]="chartsReady"
+           [style.--delay]="(i * 60) + 'ms'"
+           [style.--glow]="s.glow">
+        <div class="kpi-bg-glow" [style.background]="s.bg.replace('.15','.08')"></div>
+        <div class="kpi-top">
+          <div class="kpi-icon" [style.background]="s.bg">{{ s.icon }}</div>
+          <span class="kpi-change" [class]="s.changeType">{{ s.change }}</span>
+        </div>
+        <div class="kpi-value">{{ s.animated }}{{ s.suffix || '' }}</div>
+        <div class="kpi-label">{{ s.label }}</div>
+        <div class="kpi-sub">{{ s.sub }}</div>
+        <div class="kpi-bar">
+          <div class="kpi-bar-fill"
+               [class.go]="chartsReady"
+               [style.background]="s.color"
+               [style.--w]="s.barW">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHARTS ROW ════════════════════════════════════ -->
+    <div class="charts-row">
+
+      <!-- Bar chart -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Monthly Registrations</h3>
+            <p class="card-sub">New users per month · 2024</p>
+          </div>
+          <span class="card-pill">12 months</span>
+        </div>
+        <div class="barchart-wrap">
+          <div class="y-axis">
+            <span class="y-tick" *ngFor="let l of [24,18,12,6,0]">{{ l }}</span>
+          </div>
+          <div class="bars-wrap">
+            <div class="gridlines">
+              <div class="gl" *ngFor="let x of [1,2,3,4,5]"></div>
+            </div>
+            <div class="bc" *ngFor="let bar of barData; let i = index">
+              <div class="bo">
+                <div class="btip">{{ bar.v }}</div>
+                <div class="bfill"
+                     [class.on]="chartsReady"
+                     [style.height.%]="barHeight(bar.v)"
+                     [style.transition-delay]="barDelay(i)">
+                </div>
+              </div>
+              <span class="bxl">{{ bar.l }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut -->
+      <div class="card donut-card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">User Split</h3>
+            <p class="card-sub">By role</p>
+          </div>
+        </div>
+        <div class="donut-body">
+          <svg class="dsvg" viewBox="0 0 120 120">
+            <circle class="dbg" cx="60" cy="60" r="52"/>
+            <circle *ngFor="let seg of donutSegs; let i = index"
+                    class="darc"
+                    [class.on]="donutAnimated"
+                    cx="60" cy="60" r="52"
+                    [attr.stroke]="seg.color"
+                    [attr.stroke-dasharray]="seg.dashArray"
+                    [attr.stroke-dashoffset]="seg.dashOffset"
+                    [style.transition-delay]="arcDelay(i)">
+            </circle>
+            <text x="60" y="54" class="dcv">{{ stats[0]?.animated || 0 }}</text>
+            <text x="60" y="67" class="dcl">USERS</text>
+          </svg>
+          <div class="dleg">
+            <div class="dleg-item" *ngFor="let seg of donutSegs">
+              <span class="dleg-dot" [style.background]="seg.color"></span>
+              <span class="dleg-name">{{ seg.label }}</span>
+              <span class="dleg-pct">{{ seg.pct }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Progress -->
+      <div class="card prog-card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Global KPI Overview</h3>
+            <p class="card-sub">Platform key metrics</p>
+          </div>
+          <span class="card-pill">All metrics</span>
+        </div>
+        <div class="prog-list">
+          <div class="pi" *ngFor="let pb of progBars">
+            <div class="pi-head">
+              <span class="pi-title">{{ pb.title }}</span>
+              <span class="pi-pct" [style.background]="pb.gradient" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ pb.pct }}%</span>
+            </div>
+            <div class="pi-track">
+              <div class="pi-fill"
+                   [class.go]="progAnimated"
+                   [style.background]="pb.gradient"
+                   [style.--w]="pb.pct + '%'">
+              </div>
+            </div>
+            <div class="pi-meta">
+              <span class="pi-mv" *ngFor="let m of pb.meta">
+                <strong>{{ m.val }}</strong> {{ m.key }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+</div>
