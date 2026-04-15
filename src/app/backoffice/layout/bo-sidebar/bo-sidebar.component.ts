@@ -43,8 +43,8 @@ export class BoSidebarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated && this.authService.currentUser) {
-      this.notificationsService.startPolling(this.authService.currentUser.id, 'company');
+    if (this.authService.isAuthenticated && this.authService.currentUser && this.authService.currentUser.id) {
+      this.notificationsService.startPolling(this.authService.currentUser.id as number, 'company');
 
       const sub = this.notificationsService.unreadCount$.subscribe(count => {
         const notifItem = this.navItems.find(item => item.route === '/backoffice/notifications');
