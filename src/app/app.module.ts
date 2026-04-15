@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
@@ -11,7 +12,7 @@ import { GoogleCallbackComponent } from './core/google-callback/google-callback.
 @NgModule({
   declarations: [
     AppComponent,
-    GoogleCallbackComponent,   // ✅ virgule ajoutée
+    GoogleCallbackComponent
   ],
   imports: [
     BrowserModule,

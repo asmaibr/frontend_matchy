@@ -12,12 +12,21 @@ import { FoFooterComponent } from './layout/fo-footer/fo-footer.component';
 
 // Pages
 import { HomeComponent } from './home/home.component';
-import { RegisterComponent } from './register/register.component';
 import { CoursesResourcesComponent } from './courses-resources/courses-resources.component';
 import { EventsComponent } from './events/events.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
 import { ProjectsMilestonesComponent } from './projects-milestones/projects-milestones.component';
 import { SubscriptionManagementComponent } from './subscription-management/subscription-management.component';
+import { SubscriptionAbonnementComponent } from './subscription-abonnement/subscription-abonnement.component';
+import { SubscriptionPaymentComponent } from './subscription-payment/subscription-payment.component';
+import { CurrencySelectorComponent } from './components/currency-selector/currency-selector.component';
+import { PaymentSuccessModalComponent } from './components/payment-success-modal/payment-success-modal.component';
+import { JobSelectorComponent } from './components/job-selector/job-selector.component';
+import { MySubscriptionComponent } from './my-subscription/my-subscription.component';
+import { AvailableProjectsComponent } from './available-projects/available-projects.component';
+import { ProjectDetailsComponent } from './project-details/project-details.component';
+import { MyApplicationsComponent } from './my-applications/my-applications.component';
+import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
 
 @NgModule({
   declarations: [
@@ -25,12 +34,21 @@ import { SubscriptionManagementComponent } from './subscription-management/subsc
     FoNavbarComponent,
     FoFooterComponent,
     HomeComponent,
-    RegisterComponent,
     CoursesResourcesComponent,
     EventsComponent,
     ProfileSettingsComponent,
     ProjectsMilestonesComponent,
-    SubscriptionManagementComponent
+    SubscriptionManagementComponent,
+    SubscriptionAbonnementComponent,
+    SubscriptionPaymentComponent,
+    CurrencySelectorComponent,
+    PaymentSuccessModalComponent,
+    JobSelectorComponent,
+    MySubscriptionComponent,
+    AvailableProjectsComponent,
+    ProjectDetailsComponent,
+    MyApplicationsComponent,
+    AiRecommendationsComponent
   ],
   imports: [
     CommonModule,
@@ -38,6 +56,12 @@ import { SubscriptionManagementComponent } from './subscription-management/subsc
     FormsModule,
     ReactiveFormsModule,
     FrontofficeRoutingModule
+  ],
+  exports: [
+    SubscriptionPaymentComponent,
+    CurrencySelectorComponent,
+    PaymentSuccessModalComponent,
+    JobSelectorComponent
   ]
 })
 export class FrontofficeModule {}

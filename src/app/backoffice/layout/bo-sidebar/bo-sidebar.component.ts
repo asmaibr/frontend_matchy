@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationsService } from '../../../frontoffice/services/notifications.service';
+import { Subscription } from 'rxjs';
 
 interface NavItem {
   label: string;
   icon: string;
   route: string;
+  badge?: number;
 }
 
 @Component({
@@ -13,20 +16,49 @@ interface NavItem {
   templateUrl: './bo-sidebar.component.html',
   styleUrls: ['./bo-sidebar.component.scss']
 })
-export class BoSidebarComponent {
+export class BoSidebarComponent implements OnInit, OnDestroy {
   navItems: NavItem[] = [
-    { label: 'Dashboard',           icon: '📊', route: '/backoffice/dashboard' },
-    { label: 'Projects',            icon: '📁', route: '/backoffice/projects' },
-    { label: 'Categories',          icon: '🏷️', route: '/backoffice/categories' },
+    { label: 'Dashboard', icon: '📊', route: '/backoffice/dashboard' },
+    { label: 'Notifications', icon: '🔔', route: '/backoffice/notifications', badge: 0 },
+    { label: 'History', icon: '📜', route: '/backoffice/history' },
+    { label: 'Workspace Manager', icon: '💼', route: '/backoffice/workspace-manager' },
+    { label: 'Users', icon: '👥', route: '/backoffice/users' },
+    { label: 'Projects', icon: '📁', route: '/backoffice/projects' },
+    { label: 'Company Projects', icon: '🏢', route: '/backoffice/company-projects' },
+    { label: 'Categories', icon: '🏷️', route: '/backoffice/categories' },
     { label: 'Courses & Resources', icon: '📚', route: '/backoffice/courses-resources' },
-    { label: 'Events',              icon: '📅', route: '/backoffice/events' },
-    { label: 'Profile Settings',    icon: '⚙️', route: '/backoffice/profile-settings' },
-    { label: 'Milestones',          icon: '🎯', route: '/backoffice/projects-milestones' },
-    { label: 'Subscriptions',       icon: '💳', route: '/backoffice/subscription-management' },
-    { label: 'User Management',     icon: '🛡️', route: '/backoffice/user-management' },
+    { label: 'Events', icon: '📅', route: '/backoffice/events' },
+    { label: 'Profile Settings', icon: '⚙️', route: '/backoffice/profile-settings' },
+    { label: 'Milestones', icon: '🎯', route: '/backoffice/projects-milestones' },
+    { label: 'Subscriptions', icon: '💳', route: '/backoffice/subscription-management' },
+    { label: 'User Management', icon: '🛡️', route: '/backoffice/user-management' },
   ];
 
-  constructor(public authService: AuthService, private router: Router) {}
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+    private notificationsService: NotificationsService
+  ) {}
+
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated && this.authService.currentUser) {
+      this.notificationsService.startPolling(this.authService.currentUser.id, 'company');
+
+      const sub = this.notificationsService.unreadCount$.subscribe(count => {
+        const notifItem = this.navItems.find(item => item.route === '/backoffice/notifications');
+        if (notifItem) {
+          notifItem.badge = count;
+        }
+      });
+      this.subscriptions.push(sub);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
 
   isActive(route: string): boolean {
     return this.router.url.startsWith(route);

@@ -72,7 +72,15 @@
 
       <!-- Skills Tab -->
       <div *ngIf="activeTab === 'skills'">
-        <h2 class="section-title">Skills &amp; Expertise</h2>
+        <h2 class="section-title">Métiers &amp; compétences</h2>
+        <p class="section-sub">Choisissez votre ou vos métiers (recherche et filtres par catégorie).</p>
+        <app-job-selector
+          [multiple]="true"
+          [maxSelected]="5"
+          [(selectedIds)]="selectedJobIds">
+        </app-job-selector>
+
+        <h3 class="subsection-title">Compétences libres</h3>
         <div class="skills-grid">
           <span class="skill-tag" *ngFor="let skill of skills">
             {{ skill }}

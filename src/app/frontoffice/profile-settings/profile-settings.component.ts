@@ -21,6 +21,7 @@ export class ProfileSettingsComponent implements OnInit {
 
   skills: string[] = ['Angular', 'React', 'UI/UX Design', 'Node.js'];
   newSkill = '';
+  selectedJobIds: string[] = ['frontend-dev'];
 
   notifications = {
     emailProjects: true,

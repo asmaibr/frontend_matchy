@@ -1,8 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { BackofficeRoutingModule } from './backoffice-routing.module';
+import { FrontofficeModule } from '../frontoffice/frontoffice.module';
 
 // Layout
 import { BoLayoutComponent } from './layout/bo-layout.component';
@@ -26,6 +29,17 @@ import { BoSubscriptionManagementComponent } from './subscription-management/sub
 import { UserManagementComponent } from './user-management/user-management.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { BoSubscriptionPlanComponent } from './subscription-plan/subscription-plan.component';
+import { BoSubscriptionPayComponent } from './subscription-pay/subscription-pay.component';
+import { BoSubscriptionDashboardComponent } from './subscription-dashboard/subscription-dashboard.component';
+import { SubscriptionPlanComparisonComponent } from './subscription-plan/subscription-plan-comparison/subscription-plan-comparison.component';
+import { CompanyProjectsComponent } from './company-projects/company-projects.component';
+import { FilterPipe } from '../shared/pipes/filter.pipe';
+import { ProjectMilestonesManagerComponent } from './project-milestones-manager/project-milestones-manager.component';
+import { ReviewApplicationsComponent } from './review-applications/review-applications.component';
+import { BoNotificationsComponent } from './notifications/notifications.component';
+import { BoHistoryComponent } from './history/history.component';
+import { WorkspaceManagerComponent } from './workspace-manager/workspace-manager.component';
 
 // Wallet
 import { WalletAdminComponent } from './wallet/wallet.component';
@@ -49,13 +63,27 @@ import { WalletAdminComponent } from './wallet/wallet.component';
     UserManagementComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
-    WalletAdminComponent
+    WalletAdminComponent,
+    BoSubscriptionPlanComponent,
+    BoSubscriptionPayComponent,
+    SubscriptionPlanComparisonComponent,
+    BoSubscriptionDashboardComponent,
+    CompanyProjectsComponent,
+    FilterPipe,
+    ProjectMilestonesManagerComponent,
+    ReviewApplicationsComponent,
+    BoNotificationsComponent,
+    BoHistoryComponent,
+    WorkspaceManagerComponent
   ],
   imports: [
     CommonModule,
+    RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    BackofficeRoutingModule  // ← exporte RouterModule, donc router-outlet et routerLink fonctionnent
+    HttpClientModule,
+    BackofficeRoutingModule,
+    FrontofficeModule
   ]
 })
 export class BackofficeModule {}

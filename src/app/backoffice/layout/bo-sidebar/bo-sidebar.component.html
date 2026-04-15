@@ -21,18 +21,19 @@
       routerLinkActive="active">
       <span class="nav-icon">{{ item.icon }}</span>
       <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-badge" *ngIf="item.badge && item.badge > 0">{{ item.badge }}</span>
       <span class="nav-indicator" *ngIf="isActive(item.route)"></span>
     </a>
   </nav>
 
   <!-- User Footer -->
-  <div class="sidebar-footer" *ngIf="authService.currentUser as user">
+  <div class="sidebar-footer" *ngIf="authService.currentUser">
     <div class="user-avatar">
-      {{ getInitials(user.name) }}
+      {{ getInitials(authService.currentUser.name) }}
     </div>
     <div class="user-info">
-      <span class="user-name">{{ user.name }}</span>
-      <span class="user-role">{{ user.role }}</span>
+      <span class="user-name">{{ authService.currentUser.name }}</span>
+      <span class="user-role">{{ authService.currentUser.role }}</span>
     </div>
     <button class="logout-btn" (click)="logout()" title="Logout">
       →

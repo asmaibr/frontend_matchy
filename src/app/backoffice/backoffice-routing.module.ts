@@ -14,7 +14,17 @@ import { UserManagementComponent } from './user-management/user-management.compo
 import { CategoriesComponent } from './categories/categories.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { BoSubscriptionPlanComponent } from './subscription-plan/subscription-plan.component';
+import { SubscriptionPlanComparisonComponent } from './subscription-plan/subscription-plan-comparison/subscription-plan-comparison.component';
+import { BoSubscriptionPayComponent } from './subscription-pay/subscription-pay.component';
+import { BoSubscriptionDashboardComponent } from './subscription-dashboard/subscription-dashboard.component';
 import { AdminGuard } from '../core/guards/auth.guard';
+import { CompanyProjectsComponent } from './company-projects/company-projects.component';
+import { ProjectMilestonesManagerComponent } from './project-milestones-manager/project-milestones-manager.component';
+import { ReviewApplicationsComponent } from './review-applications/review-applications.component';
+import { BoNotificationsComponent } from './notifications/notifications.component';
+import { BoHistoryComponent } from './history/history.component';
+import { WorkspaceManagerComponent } from './workspace-manager/workspace-manager.component';
 
 const routes: Routes = [
   { path: 'login', component: BoLoginComponent },
@@ -25,17 +35,27 @@ const routes: Routes = [
     component: BoLayoutComponent,
     canActivate: [AdminGuard],
     children: [
-      { path: '',                         redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard',                component: DashboardComponent },
-      { path: 'users',                    component: UsersComponent },
-      { path: 'projects',                 component: ProjectsComponent },
-      { path: 'categories',               component: CategoriesComponent },
-      { path: 'courses-resources',        component: BoCoursesResourcesComponent },
-      { path: 'events',                   component: BoEventsComponent },
-      { path: 'profile-settings',         component: BoProfileSettingsComponent },
-      { path: 'projects-milestones',      component: BoProjectsMilestonesComponent },
-      { path: 'subscription-management',  component: BoSubscriptionManagementComponent },
-      { path: 'user-management',          component: UserManagementComponent }
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'notifications', component: BoNotificationsComponent },
+      { path: 'history', component: BoHistoryComponent },
+      { path: 'workspace-manager', component: WorkspaceManagerComponent },
+      { path: 'users', component: UsersComponent },
+      { path: 'projects', component: ProjectsComponent },
+      { path: 'company-projects', component: CompanyProjectsComponent },
+      { path: 'company-projects/:projectId/review', component: ReviewApplicationsComponent },
+      { path: 'company-projects/:projectId/milestones', component: ProjectMilestonesManagerComponent },
+      { path: 'categories', component: CategoriesComponent },
+      { path: 'courses-resources', component: BoCoursesResourcesComponent },
+      { path: 'events', component: BoEventsComponent },
+      { path: 'profile-settings', component: BoProfileSettingsComponent },
+      { path: 'projects-milestones', component: BoProjectsMilestonesComponent },
+      { path: 'subscription-management', component: BoSubscriptionManagementComponent },
+      { path: 'user-management', component: UserManagementComponent },
+      { path: 'subscription-plan', component: BoSubscriptionPlanComponent },
+      { path: 'subscription-plan-comparison', component: SubscriptionPlanComparisonComponent },
+      { path: 'subscription-pay', component: BoSubscriptionPayComponent },
+      { path: 'subscriptions/dashboard', component: BoSubscriptionDashboardComponent }
     ]
   }
 ];

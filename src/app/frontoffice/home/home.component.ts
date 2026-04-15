@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../services/auth.service';
 
 interface StatCard {
   value: string;
@@ -55,17 +55,23 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private router: Router, public authService: AuthService) {}
 
   ngOnInit(): void {}
 
   getStarted(): void {
     if (this.authService.isAuthenticated) {
-      if (this.authService.isAdmin())           this.router.navigate(['/backoffice/dashboard']);
-      else if (this.authService.isClient())     this.router.navigate(['/client/dashboard']);
-      else if (this.authService.isFreelancer()) this.router.navigate(['/freelancer/dashboard']);
+      this.router.navigate(['/subscription-management']);
     } else {
-      this.router.navigate(['/register']);
+      this.router.navigate(['/backoffice/login']);
+    }
+  }
+
+  goToLogin(): void {
+    if (this.authService.isAuthenticated) {
+      this.router.navigate(['/backoffice/dashboard']);
+    } else {
+      this.router.navigate(['/backoffice/login']);
     }
   }
 
