@@ -11,11 +11,17 @@ export interface ChatMessage {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private apiUrl = `${environment.apiUrl}/chat`;
+  private apiUrl = `${environment.apiUrl}/evenements/chat`;
 
   constructor(private http: HttpClient) {}
 
-  sendMessage(message: string): Observable<{ reply: string }> {
-    return this.http.post<{ reply: string }>(this.apiUrl, { message });
+  sendMessage(history: ChatMessage[]): Observable<{ text: string }> {
+    // Map history to remove timestamp for backend compatibility
+    const backendHistory = history.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+    
+    return this.http.post<{ text: string }>(this.apiUrl, { history: backendHistory });
   }
 }

@@ -16,7 +16,7 @@ export class ThemeService {
     // Check localStorage for saved preference
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
     this.setDarkMode(isDark, false);
   }
@@ -28,21 +28,30 @@ export class ThemeService {
 
   setDarkMode(isDark: boolean, animate: boolean = true): void {
     this.darkModeSubject.next(isDark);
-    
+
+    const html = document.documentElement;
+    const body = document.body;
+
     if (animate) {
-      // Add transition class for smooth animation
-      document.body.classList.add('theme-transitioning');
-      
+      body.classList.add('theme-transitioning');
       setTimeout(() => {
-        document.body.classList.remove('theme-transitioning');
+        body.classList.remove('theme-transitioning');
       }, 500);
     }
 
     if (isDark) {
-      document.body.classList.add('dark-mode');
+      body.classList.add('dark-mode', 'bo-dark', 'dark');
+      body.classList.remove('bo-light');
+      html.classList.add('bo-dark');
+      html.classList.remove('bo-light');
+      html.setAttribute('data-theme', 'dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.body.classList.remove('dark-mode');
+      body.classList.remove('dark-mode', 'bo-dark', 'dark');
+      body.classList.add('bo-light');
+      html.classList.remove('bo-dark');
+      html.classList.add('bo-light');
+      html.setAttribute('data-theme', 'light');
       localStorage.setItem('theme', 'light');
     }
   }

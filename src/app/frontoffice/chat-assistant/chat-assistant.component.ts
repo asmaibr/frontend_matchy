@@ -31,7 +31,7 @@ export class ChatAssistantComponent implements AfterViewChecked {
     "How do I register for an event?"
   ];
 
-  constructor(private chatService: ChatService, private router: Router) {}
+  constructor(private chatService: ChatService, private router: Router) { }
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
@@ -49,13 +49,14 @@ export class ChatAssistantComponent implements AfterViewChecked {
     this.isLoading = true;
     this.shouldScroll = true;
 
-    this.chatService.sendMessage(text).subscribe({
+    this.chatService.sendMessage(this.messages).subscribe({
       next: (res) => {
-        this.messages.push({ role: 'assistant', content: res.reply, timestamp: new Date() });
+        this.messages.push({ role: 'assistant', content: res.text, timestamp: new Date() });
         this.isLoading = false;
         this.shouldScroll = true;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Chat error:', err);
         this.messages.push({
           role: 'assistant',
           content: '⚠️ Sorry, I couldn\'t connect to the AI service. Please make sure the backend is running and try again.',
@@ -91,7 +92,7 @@ export class ChatAssistantComponent implements AfterViewChecked {
     try {
       const el = this.messagesContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
-    } catch {}
+    } catch { }
   }
 
   // Format markdown-like bold text

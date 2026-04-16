@@ -28,6 +28,7 @@ export class BoSidebarComponent implements OnInit, OnDestroy {
     { label: 'Categories', icon: '🏷️', route: '/backoffice/categories' },
     { label: 'Courses & Resources', icon: '📚', route: '/backoffice/courses-resources' },
     { label: 'Events', icon: '📅', route: '/backoffice/events' },
+    { label: 'Registrations', icon: '📋', route: '/backoffice/registrations' },
     { label: 'Profile Settings', icon: '⚙️', route: '/backoffice/profile-settings' },
     { label: 'Milestones', icon: '🎯', route: '/backoffice/projects-milestones' },
     { label: 'Subscriptions', icon: '💳', route: '/backoffice/subscription-management' },
