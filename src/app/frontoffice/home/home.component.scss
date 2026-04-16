@@ -291,13 +291,6 @@
   letter-spacing: -1px;
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #4f6ef7, #00e5ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 .section-sub {
   color: var(--fo-text-secondary);
   font-size: 16px;

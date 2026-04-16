@@ -5,9 +5,12 @@ import {
 } from '../models/subscription.model';
 import { SubscriptionService } from '../services/subscription.service';
 import { CurrencyService } from '../services/currency.service';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../services/auth.service';
 import { PdfService } from '../services/pdf.service';
 import { PromoCodeService, PromoValidationResult } from '../services/promo-code.service';
+import { FlouciService } from '../services/flouci.service';
+import { PayPalService } from '../services/paypal.service';
+import { ribValidator } from '../utils/payment-validation';
 
 const SESSION_MS = 15 * 60 * 1000;
 
@@ -36,6 +39,10 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
   promoResult: PromoValidationResult | null = null;
   promoChecking = false;
 
+  // ── Discount confirmation modal ────────────────────────────────────────────
+  showDiscountModal = false;
+  discountModalData: { code: string; discount: number; finalAmount: number } | null = null;
+
   timerLabel = '';
   private timerId: ReturnType<typeof setInterval> | null = null;
   private sessionEnd = 0;
@@ -46,13 +53,18 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
     { id: 'Konnect', label: 'Konnect', icon: '🔗' }
   ];
 
+  flouciRedirecting = false;
+  paypalRedirecting = false;
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly subscriptionService: SubscriptionService,
     public readonly currencyService: CurrencyService,
     private readonly authService: AuthService,
     private readonly pdfService: PdfService,
-    private readonly promoCodeService: PromoCodeService
+    private readonly promoCodeService: PromoCodeService,
+    private readonly flouciService: FlouciService,
+    private readonly paypalService: PayPalService
   ) {
     this.paymentForm = this.fb.group({
       promoCode: [''],
@@ -77,8 +89,9 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
   }
 
   ngOnInit(): void {
+    // Always clear draft so we start fresh at step 1
+    try { sessionStorage.removeItem(this.draftKey()); } catch { /* ignore */ }
     this.startSessionTimer();
-    this.loadDraft();
     if (this.selectedPaymentMethod) this.activeMethod = this.selectedPaymentMethod;
   }
 
@@ -126,9 +139,8 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
       const raw = sessionStorage.getItem(this.draftKey());
       if (!raw) return;
       const d = JSON.parse(raw);
+      // Restore form data only — always start at step 1
       if (d.form) this.paymentForm.patchValue(d.form, { emitEvent: false });
-      if (d.step >= 1 && d.step <= 4) this.currentStep = d.step;
-      if (d.activeMethod) this.activeMethod = d.activeMethod;
     } catch { /* ignore */ }
   }
 
@@ -159,9 +171,29 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
     if (!code.trim()) { this.promoResult = null; this.promoMessage = ''; return; }
     this.promoChecking = true;
     this.promoCodeService.validate(code, String(this.plan.id), this.basePriceTnd).subscribe({
-      next: r => { this.promoResult = r; this.promoMessage = r.message; this.promoChecking = false; this.saveDraft(); },
+      next: r => { 
+        this.promoResult = r; 
+        this.promoMessage = r.message; 
+        this.promoChecking = false;
+        
+        // Show discount modal if valid
+        if (r.valid && r.discountValue != null) {
+          this.discountModalData = {
+            code: code.toUpperCase(),
+            discount: r.discountValue,
+            finalAmount: this.promoCodeService.applyDiscount(this.basePriceTnd, r)
+          };
+          this.showDiscountModal = true;
+        }
+        
+        this.saveDraft(); 
+      },
       error: () => { this.promoChecking = false; }
     });
+  }
+
+  closeDiscountModal(): void {
+    this.showDiscountModal = false;
   }
 
   goStep1Next(): void { this.currentStep = 2; this.saveDraft(); }
@@ -180,8 +212,88 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
     this.applyValidatorsForMethod();
     this.paymentForm.updateValueAndValidity({ emitEvent: true });
     if (this.paymentForm.invalid) { this.paymentForm.markAllAsTouched(); return; }
+
+    // Flouci: redirect directly instead of going to step 4
+    if (this.activeMethod === 'MOBILE' &&
+        this.paymentForm.get('mobileProvider')?.value === 'Flouci') {
+      this.initFlouciPayment();
+      return;
+    }
+
+    // PayPal: redirect directly instead of going to step 4
+    if (this.activeMethod === 'PAYPAL') {
+      this.initPayPalPayment();
+      return;
+    }
+
     this.currentStep = 4;
     this.saveDraft();
+  }
+
+  initFlouciPayment(): void {
+    this.flouciRedirecting = true;
+    this.errorMessage = '';
+    const ref = `TXN-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+    this.flouciService.initPayment(this.effectivePriceTnd, ref).subscribe({
+      next: (res) => {
+        // Save pending payment locally before redirect
+        const userId = this.authService.currentUser?.id != null
+          ? String(this.authService.currentUser.id) : 'guest';
+        const payment: Payment = this.subscriptionService.buildPayment(this.subscription, {
+          method: 'MOBILE',
+          amountOriginalTnd: this.effectivePriceTnd,
+          mobileProvider: 'Flouci',
+          mobilePhone: this.paymentForm.get('mobilePhone')?.value
+        });
+        // Store ref so success page can verify
+        sessionStorage.setItem('flouci_pending_ref', ref);
+        sessionStorage.setItem('flouci_payment_id', res.paymentId);
+        sessionStorage.setItem('flouci_plan', this.plan.name);
+        sessionStorage.setItem('flouci_amount', String(this.effectivePriceTnd));
+
+        // Redirect to Flouci payment page
+        window.location.href = res.paymentUrl;
+      },
+      error: (err) => {
+        this.flouciRedirecting = false;
+        this.errorMessage = 'Flouci is unavailable. Please choose another payment method.';
+        console.error('[Flouci] init error:', err);
+      }
+    });
+  }
+
+  initPayPalPayment(): void {
+    this.paypalRedirecting = true;
+    this.errorMessage = '';
+    const ref = `TXN-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+    // Convert TND to USD for PayPal
+    const amountUsd = this.paypalService.convertTndToUsd(this.effectivePriceTnd);
+
+    this.paypalService.createOrder(amountUsd, 'USD', ref).subscribe({
+      next: (res) => {
+        // Save pending payment locally before redirect
+        const userId = this.authService.currentUser?.id != null
+          ? String(this.authService.currentUser.id) : 'guest';
+        
+        // Store payment info for success page
+        sessionStorage.setItem('paypal_pending_ref', ref);
+        sessionStorage.setItem('paypal_order_id', res.orderId);
+        sessionStorage.setItem('paypal_plan', this.plan.name);
+        sessionStorage.setItem('paypal_amount_tnd', String(this.effectivePriceTnd));
+        sessionStorage.setItem('paypal_amount_usd', String(amountUsd));
+        sessionStorage.setItem('paypal_email', this.paymentForm.get('paypalEmail')?.value || '');
+
+        // Redirect to PayPal approval page
+        window.location.href = res.approvalUrl;
+      },
+      error: (err) => {
+        this.paypalRedirecting = false;
+        this.errorMessage = 'PayPal is unavailable. Please choose another payment method.';
+        console.error('[PayPal] init error:', err);
+      }
+    });
   }
 
   goBack(): void {
@@ -205,7 +317,7 @@ export class SubscriptionPaymentComponent implements OnInit, OnChanges, OnDestro
       this.paymentForm.get('mobilePhone')?.setValidators([Validators.required]);
     } else if (this.activeMethod === 'BANK_TRANSFER') {
       this.paymentForm.get('bankName')?.setValidators([Validators.required]);
-      this.paymentForm.get('rib')?.setValidators([Validators.required]);
+      this.paymentForm.get('rib')?.setValidators([Validators.required, ribValidator(), Validators.maxLength(20)]);
       this.paymentForm.get('accountHolder')?.setValidators([Validators.required, Validators.minLength(3)]);
     }
     Object.keys(this.paymentForm.controls).forEach(key => {

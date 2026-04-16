@@ -592,3 +592,86 @@
 
 .bo-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--bo-border, #e5e7eb); padding-bottom: 12px; }
 .toggle-view { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--bo-border, #e5e7eb); background: transparent; color: var(--bo-text-secondary, #6b7280); transition: all 0.2s; font-family: var(--font-body, inherit); text-decoration: none; &.active { background: var(--primary, #3b82f6); color: white; border-color: var(--primary, #3b82f6); } &:not(.active):hover { border-color: var(--primary, #3b82f6); color: var(--primary, #3b82f6); } }
+
+// ── Promo Code Section ──────────────────────────────────────
+.promo-section {
+  margin-top: 40px;
+  padding: 24px;
+  background: #1a1f2e;
+  border-radius: 16px;
+  border: 1px solid #2d3348;
+}
+
+.promo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  h2 { font-size: 1.1rem; color: #ffffff; margin: 0 0 4px; }
+  p  { font-size: 0.85rem; color: #d1d5db; margin: 0;
+    strong { color: #22c55e; }
+  }
+}
+
+.promo-create-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.promo-input-field {
+  flex: 1;
+  min-width: 200px;
+  padding: 9px 14px;
+  background: #0f1117;
+  border: 1px solid #2d3348;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-family: monospace;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &::placeholder { color: #6b7280; }
+  &:focus { border-color: #4f6ef7; }
+}
+
+.promo-input-error {
+  color: #f87171;
+  font-size: 0.8rem;
+  margin: 0 0 12px;
+}
+
+.promo-empty {
+  text-align: center;
+  padding: 32px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  border: 1px dashed #2d3348;
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.promo-table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.promo-code-cell strong {
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+}
+
+.promo-date, .promo-usage {
+  color: #d1d5db;
+}
+
+.row-inactive td {
+  opacity: 0.45;
+}

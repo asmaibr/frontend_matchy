@@ -7,13 +7,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { GoogleCallbackComponent } from './core/google-callback/google-callback.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    GoogleCallbackComponent
-  ],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

@@ -1,47 +1,73 @@
-import { Injectable } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AuthState, User } from '../models/models';
 
-@Injectable({ providedIn: "root" })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  private _isAuthenticated = false;
-  currentUser: any = null; // will hold user info after login
+  private authState = new BehaviorSubject<AuthState>({
+    isAuthenticated: false,
+    user: null,
+    token: null
+  });
 
-  checkAuth(): void {
-    // placeholder logic, will be replaced by real implementation later
-    this._isAuthenticated = !!localStorage.getItem("token");
+  authState$ = this.authState.asObservable();
+
+  get currentUser(): User | null {
+    return this.authState.value.user;
   }
 
-  /**
-   * Call with either login(email,password) or login({username,password})
-   */
-  login(
-    emailOrCredentials: string | { username: string; password: string },
-    password?: string,
-  ): Observable<boolean> {
-    // normalize arguments
-    let email: string;
-    let pwd: string;
-    if (typeof emailOrCredentials === "string") {
-      email = emailOrCredentials;
-      pwd = password || "";
-    } else {
-      email = emailOrCredentials.username;
-      pwd = emailOrCredentials.password;
-    }
-    // fake login logic, set token and currentUser
-    this._isAuthenticated = true;
-    this.currentUser = { id: "1", name: email.split("@")[0], role: "admin" };
-    localStorage.setItem("token", "dummy");
+  get isAuthenticated(): boolean {
+    return this.authState.value.isAuthenticated;
+  }
+
+  get isAdmin(): boolean {
+    return this.authState.value.user?.role === 'admin';
+  }
+
+  login(email: string, password: string): Observable<boolean> {
+    // Mock login — replace with real API call
+    const mockAdmin: User = {
+      id: 1,
+      name: 'Admin Matchy',
+      email: 'admin@matchy.tn',
+      role: 'admin',
+      status: 'active',
+      verified: true,
+      createdAt: new Date()
+    };
+    this.authState.next({
+      isAuthenticated: true,
+      user: mockAdmin,
+      token: 'mock-jwt-token'
+    });
+    localStorage.setItem('matchy_token', 'mock-jwt-token');
     return of(true);
   }
 
   logout(): void {
-    this._isAuthenticated = false;
-    this.currentUser = null;
-    localStorage.removeItem("token");
+    this.authState.next({ isAuthenticated: false, user: null, token: null });
+    localStorage.removeItem('matchy_token');
   }
 
-  isAuthenticated(): boolean {
-    return this._isAuthenticated;
+  checkAuth(): void {
+    const token = localStorage.getItem('matchy_token');
+    if (token) {
+      // TODO: validate token with API
+      this.authState.next({
+        isAuthenticated: true,
+        user: {
+          id: 1,
+          name: 'Admin Matchy',
+          email: 'admin@matchy.tn',
+          role: 'admin',
+          status: 'active',
+          verified: true,
+          createdAt: new Date()
+        },
+        token
+      });
+    }
   }
 }

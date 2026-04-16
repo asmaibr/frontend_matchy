@@ -1,38 +1,155 @@
 <div class="my-sub-page">
-  <div class="page-header">
-    <div class="hero-badge">📋 My Subscription</div>
-    <h1>Your <span class="grad">Plan</span></h1>
-    <p>Manage your subscription, renewal and invoices.</p>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading your subscription...</p>
   </div>
 
-  <div class="status-card">
-    <div class="status-head">
-      <div>
-        <h2>{{ plan.name }} <span class="dot">● ACTIVE</span></h2>
-        <p>Valid until {{ renewDate | date:'longDate' }}</p>
-      </div>
-      <div class="actions">
-        <button type="button" class="btn outline" (click)="changePlan()">Change Plan</button>
-        <button type="button" class="btn primary" (click)="renew()">Renew</button>
-      </div>
+  <!-- NO SUBSCRIPTION STATE -->
+  <div class="empty-state" *ngIf="!isLoading && !hasSubscription">
+    <div class="empty-icon">📭</div>
+    <h2>No Active Subscription</h2>
+    <p class="empty-desc">
+      You don't have an active subscription yet.<br>
+      Unlock more opportunities and grow your freelance career with a paid plan.
+    </p>
+    <div class="empty-perks">
+      <div class="perk"><span>⚡</span> Unlimited bids</div>
+      <div class="perk"><span>🏆</span> Featured profile</div>
+      <div class="perk"><span>📊</span> Analytics dashboard</div>
+      <div class="perk"><span>🎯</span> Priority in search results</div>
     </div>
-    <div class="progress-wrap">
-      <div class="progress-bar"><span [style.width.%]="progress * 100"></span></div>
-      <span class="pct">{{ progress * 100 | number:'1.0-0' }}% of the period used</span>
-    </div>
-    <div class="renew-row">
-      <label class="toggle-line">
-        <input type="checkbox" [checked]="autoRenew" (change)="toggleAutoRenew()">
-        <span>Auto-renewal</span>
-      </label>
-    </div>
+    <button class="btn primary large" (click)="goToPlans()">
+      🚀 Explore Plans
+    </button>
   </div>
 
-  <section class="section">
-    <h3>Payment History</h3>
-    <p class="muted">PDF invoices will appear here after admin validation.</p>
-    <div class="empty-box">No recent payments to display (demo).</div>
-  </section>
+  <!-- HAS SUBSCRIPTION STATE -->
+  <ng-container *ngIf="!isLoading && hasSubscription">
+    <div class="page-header">
+      <div class="hero-badge">📋 My Subscription</div>
+      <h1>Your <span class="grad">Plan</span></h1>
+      <p>Manage your subscription, renewal and invoices.</p>
+    </div>
+
+    <!-- ── TRIAL EXPIRED BANNER ─────────────────────────────────────────── -->
+    <div class="trial-expired-banner" *ngIf="isTrialExpired">
+      <div class="expired-icon">⏰</div>
+      <div class="expired-content">
+        <h3>Your free trial has ended</h3>
+        <p>Upgrade now to keep access to all {{ plan.name }} features.</p>
+      </div>
+      <button class="btn upgrade-btn" (click)="upgradeNow()">
+        🚀 Upgrade Now
+      </button>
+    </div>
+
+    <!-- ── TRIAL EXPIRING SOON WARNING ────────────────────────────────────── -->
+    <div class="trial-warning-banner" *ngIf="isTrialExpiringSoon">
+      <span class="warn-icon">⚠️</span>
+      <span>
+        Your free trial expires in
+        <strong>{{ trialDaysRemaining }} day{{ trialDaysRemaining !== 1 ? 's' : '' }}</strong>
+        — upgrade to keep access.
+      </span>
+      <button class="btn btn-sm outline-warn" (click)="upgradeNow()">Upgrade</button>
+    </div>
+
+    <div class="status-card" [class.trial-card]="isTrial && !isTrialExpired"
+                             [class.expired-card]="isTrialExpired">
+
+      <div class="status-head">
+        <div>
+          <h2>
+            {{ plan.icon }} {{ plan.name }}
+
+            <!-- Trial badge -->
+            <span class="trial-badge" *ngIf="isTrial && !isTrialExpired">
+              🎁 7-Day Free Trial
+            </span>
+
+            <!-- Status dot -->
+            <span class="dot"
+              [class.active]="subscriptionStatus === 'ACTIVE'"
+              [class.pending]="subscriptionStatus === 'PENDING'"
+              [class.trial]="subscriptionStatus === 'TRIAL'"
+              [class.expired]="subscriptionStatus === 'EXPIRED'">
+              ●
+              {{ subscriptionStatus === 'TRIAL' ? 'Trial' :
+                 subscriptionStatus === 'EXPIRED' ? 'Expired' :
+                 subscriptionStatus === 'ACTIVE' ? 'Active' : 'Pending' }}
+            </span>
+          </h2>
+
+          <!-- Status messages -->
+          <p *ngIf="subscriptionStatus === 'ACTIVE'">
+            Valid until {{ renewDate | date:'longDate' }}
+          </p>
+          <p *ngIf="subscriptionStatus === 'PENDING'" class="pending-msg">
+            ⏳ Awaiting admin confirmation — you'll receive an email once activated.
+          </p>
+          <p *ngIf="subscriptionStatus === 'TRIAL'" class="trial-msg">
+            🎁 Free trial active — ends {{ trialEndDate | date:'mediumDate' }}
+          </p>
+          <p *ngIf="subscriptionStatus === 'EXPIRED'" class="expired-msg">
+            ❌ Your trial has ended. Upgrade to continue.
+          </p>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn outline" (click)="changePlan()"
+            *ngIf="!isTrialExpired">Change Plan</button>
+          <button type="button" class="btn primary" (click)="renew()"
+            *ngIf="subscriptionStatus === 'ACTIVE'">Renew</button>
+          <button type="button" class="btn upgrade-btn" (click)="upgradeNow()"
+            *ngIf="isTrialExpired">🚀 Upgrade Now</button>
+        </div>
+      </div>
+
+      <!-- ── TRIAL PROGRESS BAR ──────────────────────────────────────────── -->
+      <div class="trial-progress-wrap" *ngIf="isTrial && !isTrialExpired">
+        <div class="trial-progress-header">
+          <span class="trial-label">Free Trial</span>
+          <span class="trial-days"
+            [class.urgent]="trialDaysRemaining <= 1"
+            [class.warning]="trialDaysRemaining === 2">
+            {{ trialDaysRemaining }} day{{ trialDaysRemaining !== 1 ? 's' : '' }} remaining
+          </span>
+        </div>
+        <div class="trial-bar-bg">
+          <div class="trial-bar-fill"
+            [style.width.%]="trialProgressPercent"
+            [style.background]="trialBarColor">
+          </div>
+        </div>
+        <div class="trial-dates">
+          <span>Started today</span>
+          <span>Ends {{ trialEndDate | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <!-- Regular progress bar (only for active non-trial) -->
+      <div class="progress-wrap" *ngIf="subscriptionStatus === 'ACTIVE' && !isTrial">
+        <div class="progress-bar"><span [style.width.%]="progress * 100"></span></div>
+        <span class="pct">{{ progress * 100 | number:'1.0-0' }}% of the period used</span>
+      </div>
+
+      <!-- Payment method -->
+      <div class="method-row" *ngIf="paymentMethod">
+        <span class="method-label">Payment method</span>
+        <span class="method-value">{{ getPaymentMethodLabel() }}</span>
+      </div>
+
+      <!-- Auto-renewal -->
+      <div class="renew-row" *ngIf="subscriptionStatus === 'ACTIVE'">
+        <label class="toggle-line">
+          <input type="checkbox" [checked]="autoRenew" (change)="toggleAutoRenew()">
+          <span>Auto-renewal</span>
+        </label>
+      </div>
+    </div>
+  </ng-container>
 
 </div>
 

@@ -26,17 +26,31 @@
           <div class="recap-row"><span>Plan</span><strong [style.color]="plan.color">{{ plan.name }}</strong></div>
           <div class="recap-row"><span>Duration</span><strong>{{ subscription.duration }} month{{ (subscription.duration || 1) > 1 ? 's' : '' }}</strong></div>
           <div class="recap-row"><span>Currency</span><strong>{{ currencyService.getCurrency() }}</strong></div>
-          <div class="recap-row total"><span>Total</span><strong>{{ currencyService.formatAmount(effectivePriceTnd) }}</strong></div>
+          <div class="recap-row" *ngIf="discountTnd > 0" style="color:#22c55e;">
+            <span>Promo Discount</span><strong>-{{ discountTnd }} TND ({{ promoResult?.discountValue }}%)</strong>
+          </div>
+          <div class="recap-row" *ngIf="discountTnd > 0" style="text-decoration:line-through;opacity:0.5;">
+            <span>Original Price</span><strong>{{ currencyService.formatAmount(basePriceTnd) }}</strong>
+          </div>
+          <div class="recap-row total"><span>Total</span><strong [style.color]="discountTnd > 0 ? '#22c55e' : ''">{{ currencyService.formatAmount(effectivePriceTnd) }}</strong></div>
         </div>
         <div class="promo-box">
-          <label>Promo Code</label>
+          <label>Promo Code <span class="optional">(optional)</span></label>
           <div class="promo-row">
-            <input type="text" formControlName="promoCode" placeholder="e.g. LAUNCH50" class="promo-input">
+            <input type="text" formControlName="promoCode" placeholder="Enter promo code" class="promo-input"
+              (keyup.enter)="validatePromo()">
             <button type="button" class="btn-secondary" (click)="validatePromo()" [disabled]="promoChecking">
               {{ promoChecking ? '…' : 'Apply' }}
             </button>
           </div>
-          <p class="promo-msg" *ngIf="promoMessage" [class.ok]="promoResult?.valid" [class.err]="promoResult && !promoResult.valid">{{ promoMessage }}</p>
+          <p class="promo-msg" *ngIf="promoMessage"
+            [class.ok]="promoResult?.valid"
+            [class.err]="promoResult && !promoResult.valid">
+            {{ promoMessage }}
+          </p>
+          <p class="promo-hint" *ngIf="!promoMessage">
+            Have a promo code? Enter it above to get a discount.
+          </p>
         </div>
         <div class="security-badges">
           <span class="sec-badge">🔒 Secure Payment</span>
@@ -167,9 +181,19 @@
             <span class="error-msg" *ngIf="isFieldInvalid('bankName')">{{ fieldError('bankName') }}</span>
           </div>
           <div class="form-group">
-            <label>RIB / IBAN</label>
-            <input type="text" formControlName="rib" placeholder="20-digit RIB or IBAN" [class.error]="isFieldInvalid('rib')">
-            <span class="error-msg" *ngIf="isFieldInvalid('rib')">{{ fieldError('rib') }}</span>
+            <label>RIB / IBAN <span class="required">*</span></label>
+            <input 
+              type="text" 
+              formControlName="rib" 
+              placeholder="20 chiffres (ex: 12345678901234567890)" 
+              [class.error]="isFieldInvalid('rib')"
+              maxlength="20">
+            <small class="form-hint">Format tunisien: 20 chiffres uniquement</small>
+            <span class="error-msg" *ngIf="isFieldInvalid('rib')">
+              <span *ngIf="paymentForm.get('rib')?.hasError('required')">Le RIB/IBAN est requis</span>
+              <span *ngIf="paymentForm.get('rib')?.hasError('rib')">Le RIB doit contenir exactement 20 chiffres</span>
+              <span *ngIf="paymentForm.get('rib')?.hasError('maxlength')">Maximum 20 chiffres</span>
+            </span>
           </div>
           <div class="form-group">
             <label>Account Holder</label>
@@ -190,20 +214,42 @@
               <span>{{ p.label }}</span>
             </button>
           </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" formControlName="mobilePhone" placeholder="+216 XX XXX XXX" [class.error]="isFieldInvalid('mobilePhone')">
-            <span class="error-msg" *ngIf="isFieldInvalid('mobilePhone')">{{ fieldError('mobilePhone') }}</span>
+
+          <!-- Flouci: redirect flow -->
+          <div *ngIf="paymentForm.get('mobileProvider')?.value === 'Flouci'" class="flouci-info-box">
+            <div class="flouci-logo">💚 Flouci</div>
+            <p>You will be redirected to Flouci to complete your payment securely.</p>
+            <p class="flouci-amount">Amount: <strong>{{ currencyService.formatAmount(effectivePriceTnd) }}</strong></p>
           </div>
-          <div class="form-group">
-            <label>Transaction Code <span class="optional">(optional)</span></label>
-            <input type="text" formControlName="mobileTransactionCode" placeholder="Code received after payment">
-          </div>
+
+          <!-- D17 / Konnect: phone number flow -->
+          <ng-container *ngIf="paymentForm.get('mobileProvider')?.value !== 'Flouci'">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" formControlName="mobilePhone" placeholder="+216 XX XXX XXX"
+                [class.error]="isFieldInvalid('mobilePhone')">
+              <span class="error-msg" *ngIf="isFieldInvalid('mobilePhone')">{{ fieldError('mobilePhone') }}</span>
+            </div>
+            <div class="form-group">
+              <label>Transaction Code <span class="optional">(optional)</span></label>
+              <input type="text" formControlName="mobileTransactionCode" placeholder="Code received after payment">
+            </div>
+          </ng-container>
         </ng-container>
 
         <div class="step-nav">
           <button type="button" class="btn-back" (click)="goBack()">← Back</button>
-          <button type="button" class="btn-primary" (click)="goStep3Next()">Continue</button>
+          <button type="button" class="btn-primary" (click)="goStep3Next()" [disabled]="flouciRedirecting || paypalRedirecting">
+            <span *ngIf="!flouciRedirecting && !paypalRedirecting">
+              {{ activeMethod === 'MOBILE' && paymentForm.get('mobileProvider')?.value === 'Flouci'
+                ? '💚 Pay with Flouci' 
+                : activeMethod === 'PAYPAL' 
+                ? '🅿️ Pay with PayPal'
+                : 'Continue' }}
+            </span>
+            <span *ngIf="flouciRedirecting">Redirecting to Flouci...</span>
+            <span *ngIf="paypalRedirecting">Redirecting to PayPal...</span>
+          </button>
         </div>
       </div>
 
@@ -266,3 +312,37 @@
   (downloadInvoicePdf)="downloadInvoicePreview()"
   (closed)="onDashboard()">
 </app-payment-success-modal>
+
+<!-- Discount Confirmation Modal -->
+<div class="discount-modal-backdrop" *ngIf="showDiscountModal" (click)="closeDiscountModal()">
+  <div class="discount-modal" (click)="$event.stopPropagation()">
+    <div class="discount-modal-header">
+      <h2>🎉 Promo Code Applied!</h2>
+      <button type="button" class="close-btn" (click)="closeDiscountModal()">✕</button>
+    </div>
+    <div class="discount-modal-body" *ngIf="discountModalData">
+      <div class="discount-code-badge">
+        <span class="code">{{ discountModalData.code }}</span>
+      </div>
+      <div class="discount-details">
+        <p class="discount-label">You saved</p>
+        <p class="discount-amount">{{ discountTnd }} TND</p>
+        <p class="discount-percent">({{ discountModalData.discount }}% off)</p>
+      </div>
+      <div class="price-comparison">
+        <div class="price-row original">
+          <span>Original Price</span>
+          <span class="strikethrough">{{ currencyService.formatAmount(basePriceTnd) }}</span>
+        </div>
+        <div class="price-row final">
+          <span>Final Price</span>
+          <span class="highlight">{{ currencyService.formatAmount(discountModalData.finalAmount) }}</span>
+        </div>
+      </div>
+      <p class="discount-message">✅ Your discount has been applied to this order</p>
+    </div>
+    <div class="discount-modal-footer">
+      <button type="button" class="btn-primary" (click)="closeDiscountModal()">Continue</button>
+    </div>
+  </div>
+</div>

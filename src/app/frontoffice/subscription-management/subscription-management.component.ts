@@ -85,7 +85,8 @@ export class SubscriptionManagementComponent implements OnInit {
   }
 
   onPaymentSuccess(_response: PaymentResponse): void {
-    /** Le succès (modal + référence) est géré dans `SubscriptionPaymentComponent`. */
+    /** Le succès (modal + référence) est géré dans `SubscriptionPaymentComponent`.
+     *  Le paiement est PENDING — l'abonnement sera activé après approbation admin. */
   }
 
   downloadInvoice(): void {

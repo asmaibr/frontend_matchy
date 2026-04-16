@@ -160,3 +160,75 @@
             </div>
         </div>
     </div>
+
+<!-- ── Promo Code Management ─────────────────────────────── -->
+<div class="promo-section">
+    <div class="promo-header">
+        <div>
+            <h2>🎟️ Promo Codes</h2>
+            <p>Create discount codes for users — each code gives <strong>10% off</strong> any paid plan.</p>
+        </div>
+    </div>
+
+    <div class="bo-toast" *ngIf="promoToast" role="status">{{ promoToast }}</div>
+
+    <!-- Create code form -->
+    <div class="promo-create-row">
+        <input
+            type="text"
+            class="promo-input-field"
+            [(ngModel)]="newPromoCodeInput"
+            placeholder="Enter custom code (e.g. SUMMER10)"
+            maxlength="20"
+            (keyup.enter)="addManualPromoCode()">
+        <button class="btn-primary" (click)="addManualPromoCode()" [disabled]="!newPromoCodeInput.trim()">
+            ➕ Add Code
+        </button>
+        <button class="btn-secondary" (click)="generatePromoCode()">
+            🎲 Auto-Generate
+        </button>
+    </div>
+    <p *ngIf="promoInputError" class="promo-input-error">{{ promoInputError }}</p>
+
+    <div class="promo-empty" *ngIf="promoCodes.length === 0">
+        No promo codes yet. Add one above.
+    </div>
+
+    <div class="promo-table-wrap" *ngIf="promoCodes.length > 0">
+        <table class="bo-data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Discount</th>
+                    <th>Created</th>
+                    <th>Usage</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let p of promoCodes" [class.row-inactive]="!p.active">
+                    <td class="id-cell promo-code-cell">
+                        <strong>{{ p.code }}</strong>
+                    </td>
+                    <td><span class="badge badge-success">{{ p.discountPercent }}% OFF</span></td>
+                    <td class="promo-date">{{ p.createdAt }}</td>
+                    <td class="promo-usage">{{ p.usageCount }} use{{ p.usageCount !== 1 ? 's' : '' }}</td>
+                    <td>
+                        <span class="badge" [class]="p.active ? 'badge-success' : 'badge-muted'">
+                            {{ p.active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
+                    <td class="bo-actions-cell">
+                        <button class="btn-action view" (click)="copyCode(p.code)" title="Copy code">📋</button>
+                        <button class="btn-action edit" (click)="togglePromoCode(p)"
+                            [title]="p.active ? 'Deactivate' : 'Activate'">
+                            {{ p.active ? '🔴' : '🟢' }}
+                        </button>
+                        <button class="btn-action delete" (click)="deletePromoCode(p)" title="Delete">🗑</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

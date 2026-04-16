@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FoLayoutComponent } from './layout/fo-layout.component';
 import { HomeComponent } from './home/home.component';
-import { RegisterComponent } from './register/register.component';
-import { ProjectsHomeComponent } from './projects-home/projects-home.component';
 import { CoursesResourcesComponent } from './courses-resources/courses-resources.component';
 import { EventsComponent } from './events/events.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
@@ -12,11 +10,8 @@ import { SubscriptionManagementComponent } from './subscription-management/subsc
 import { SubscriptionAbonnementComponent } from './subscription-abonnement/subscription-abonnement.component';
 import { SubscriptionPaymentComponent } from './subscription-payment/subscription-payment.component';
 import { MySubscriptionComponent } from './my-subscription/my-subscription.component';
-import { AvailableProjectsComponent } from './available-projects/available-projects.component';
-import { ProjectDetailsComponent } from './project-details/project-details.component';
-import { MyApplicationsComponent } from './my-applications/my-applications.component';
-import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
-import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
+import { PaymentSuccessComponent } from './payment-success/payment-success.component';
+import { PaymentFailComponent } from './payment-fail/payment-fail.component';
 
 const routes: Routes = [
   {
@@ -25,22 +20,16 @@ const routes: Routes = [
     children: [
       { path: '', component: HomeComponent },
       { path: 'home', redirectTo: '', pathMatch: 'full' },
-      { path: 'register', component: RegisterComponent },
-      { path: 'projects', component: AvailableProjectsComponent },
-      { path: 'projects/:id', component: ProjectDetailsComponent },
       { path: 'courses-resources', component: CoursesResourcesComponent },
       { path: 'events', component: EventsComponent },
-      { path: 'available-projects', redirectTo: 'projects', pathMatch: 'full' },
-      { path: 'available-projects/:id', redirectTo: 'projects/:id', pathMatch: 'full' },
-      { path: 'my-applications', component: MyApplicationsComponent },
-      { path: 'ai-recommendations', component: AiRecommendationsComponent },
-      { path: 'chat-assistant', component: ChatAssistantComponent },
       { path: 'profile-settings', component: ProfileSettingsComponent },
       { path: 'projects-milestones', component: ProjectsMilestonesComponent },
       { path: 'subscription-management', component: SubscriptionManagementComponent },
       { path: 'my-subscription', component: MySubscriptionComponent },
       { path: 'subscription-abonnement/:planId/:planName', component: SubscriptionAbonnementComponent },
       { path: 'subscription-payment/:subscriptionId', component: SubscriptionPaymentComponent },
+      { path: 'payment-success', component: PaymentSuccessComponent },
+      { path: 'payment-fail', component: PaymentFailComponent },
     ]
   }
 ];

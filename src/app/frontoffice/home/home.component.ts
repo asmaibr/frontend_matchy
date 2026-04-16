@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../services/auth.service';
 
 interface StatCard {
   value: string;
@@ -63,7 +63,7 @@ export class HomeComponent implements OnInit {
     if (this.authService.isAuthenticated) {
       this.router.navigate(['/subscription-management']);
     } else {
-      this.router.navigate(['/register']);
+      this.router.navigate(['/backoffice/login']);
     }
   }
 
