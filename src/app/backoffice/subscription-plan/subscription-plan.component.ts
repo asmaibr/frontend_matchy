@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SubscriptionService } from '../../frontoffice/services/subscription.service';
 import { SubscriptionPlan } from '../../frontoffice/models/subscription.model';
+import { PromoCodeService, PromoCode } from '../../frontoffice/services/promo-code.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -27,10 +28,11 @@ export class BoSubscriptionPlanComponent implements OnInit {
     icons = ['🌱', '⚡', '👑', '🚀', '💎', '🔥', '⭐', '🎯', '💼', '🏆'];
     colors = ['#6b7280', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4'];
 
-    constructor(private subscriptionService: SubscriptionService, private router: Router) { }
+    constructor(private subscriptionService: SubscriptionService, private router: Router, private promoService: PromoCodeService) { }
 
     ngOnInit(): void {
         this.loadPlans();
+        this.loadPromoCodes();
     }
 
     loadPlans(): void {
@@ -122,6 +124,130 @@ export class BoSubscriptionPlanComponent implements OnInit {
         this.showDeleteModal = false;
     }
 
+    // ── Promo Code Management ─────────────────────────────────
+
+    promoCodes: PromoCode[] = [];
+    promoToast = '';
+    newPromoCodeInput = '';
+    promoInputError = '';
+
+    loadPromoCodes(): void {
+        // Load from backend API
+        this.promoService.getCodesObservable().subscribe(
+            (codes: PromoCode[]) => {
+                this.promoCodes = codes;
+            },
+            (error) => {
+                console.error('Error loading promo codes:', error);
+                // Fallback to local cache
+                this.promoCodes = this.promoService.getCodes();
+            }
+        );
+    }
+
+    generatePromoCode(): void {
+        this.promoService.generateCodeObservable().subscribe(
+            (code: PromoCode) => {
+                this.loadPromoCodes();
+                this.showPromoToast(`✅ Code generated: ${code.code}`);
+            },
+            (error) => {
+                console.error('Error generating code:', error);
+                this.showPromoToast('❌ Failed to generate code');
+            }
+        );
+    }
+
+    addManualPromoCode(): void {
+        const raw = this.newPromoCodeInput.trim().toUpperCase();
+        if (!raw) return;
+        // Validate: only letters, numbers, hyphens
+        if (!/^[A-Z0-9\-]{3,20}$/.test(raw)) {
+            this.promoInputError = 'Code must be 3–20 characters (letters, numbers, hyphens only).';
+            return;
+        }
+        // Check duplicate in local cache
+        if (this.promoService.getCodes().some(c => c.code === raw)) {
+            this.promoInputError = 'This code already exists.';
+            return;
+        }
+        this.promoInputError = '';
+        
+        // Create code via backend API
+        this.promoService.createCodeObservable(raw, 10).subscribe(
+            (createdCode: PromoCode) => {
+                this.newPromoCodeInput = '';
+                this.loadPromoCodes();
+                this.showPromoToast(`✅ Code "${raw}" added to database`);
+            },
+            (error) => {
+                console.error('Error creating promo code:', error);
+                this.promoInputError = error.error?.message || 'Failed to create code';
+            }
+        );
+    }
+
+    togglePromoCode(code: PromoCode): void {
+        if (!code.id) {
+            console.error('Code ID is missing');
+            return;
+        }
+        
+        if (code.active) {
+            // Deactivate
+            this.promoService.deactivateCode(code.id).subscribe(
+                () => {
+                    this.loadPromoCodes();
+                    this.showPromoToast(`🔒 Code deactivated`);
+                },
+                (error) => {
+                    console.error('Error deactivating code:', error);
+                    this.showPromoToast('❌ Failed to deactivate code');
+                }
+            );
+        } else {
+            // Reactivate
+            this.promoService.reactivateCode(code.id).subscribe(
+                () => {
+                    this.loadPromoCodes();
+                    this.showPromoToast(`✅ Code reactivated`);
+                },
+                (error) => {
+                    console.error('Error reactivating code:', error);
+                    this.showPromoToast('❌ Failed to reactivate code');
+                }
+            );
+        }
+    }
+
+    deletePromoCode(code: PromoCode): void {
+        if (!code.id) {
+            console.error('Code ID is missing');
+            return;
+        }
+        
+        if (confirm(`Delete code "${code.code}"?`)) {
+            this.promoService.deleteCodeObservable(code.id).subscribe(
+                () => {
+                    this.loadPromoCodes();
+                    this.showPromoToast('🗑 Code deleted');
+                },
+                (error) => {
+                    console.error('Error deleting code:', error);
+                    this.showPromoToast('❌ Failed to delete code');
+                }
+            );
+        }
+    }
+
+    copyCode(code: string): void {
+        navigator.clipboard.writeText(code).then(() => this.showPromoToast('📋 Copied to clipboard'));
+    }
+
+    private showPromoToast(msg: string): void {
+        this.promoToast = msg;
+        setTimeout(() => this.promoToast = '', 3000);
+    }
     getAllFeatures(): string[] {
         const all = new Set<string>();
         this.plans.forEach(p => (p.features || []).forEach(f => all.add(f)));

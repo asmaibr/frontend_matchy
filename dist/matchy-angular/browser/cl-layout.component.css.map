@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["angular:styles/component:css;4be344d672ecd3db5c9401bb36f1727697620249c41ebf6fcff48f102ae5e4ee;C:/Users/abdellah/Desktop/matchy-angular (1)/matchy-angular/frontend/src/app/client/layout/cl-layout.component.ts"],
-  "sourcesContent": ["\n    .cl-layout {\n      display: flex;\n      flex-direction: column;\n      min-height: 100vh;\n      background: var(--bo-bg-primary);\n      font-family: var(--font-body);\n    }\n    .cl-content {\n      flex: 1;\n      padding: 24px 32px;\n      overflow-y: auto;\n      overflow-x: hidden;\n    }\n  "],
-  "mappings": ";AACI,CAAC;AACC,WAAS;AACT,kBAAgB;AAChB,cAAY;AACZ,cAAY,IAAI;AAChB,eAAa,IAAI;AACnB;AACA,CAAC;AACC,QAAM;AACN,WAAS,KAAK;AACd,cAAY;AACZ,cAAY;AACd;",
-  "names": []
-}

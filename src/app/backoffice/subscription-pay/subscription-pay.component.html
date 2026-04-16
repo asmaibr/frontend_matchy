@@ -46,7 +46,10 @@
             <option *ngFor="let m of methods" [value]="m">{{ m === 'all' ? 'All Methods' : (m | titlecase) }}</option>
         </select>
         <div class="bo-filter-spacer"></div>
-        <button class="btn-export">📄 Export CSV</button>
+        <button class="btn-export" (click)="loadPaymentsFromBackend()">🔄 Refresh</button>
+        <button class="btn-export" (click)="exportCSV()">📄 CSV</button>
+        <button class="btn-export" (click)="exportExcel()">📊 Excel</button>
+        <button class="btn-export" (click)="exportPDF()">🖨️ PDF</button>
     </div>
 
     <!-- Payments Table -->
@@ -65,8 +68,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let p of filteredPayments" [class.row-failed]="p.status === 'failed'"
-                    [class.row-refunded]="p.status === 'refunded'">
+                <tr *ngFor="let p of filteredPayments"
+                    [class.row-failed]="p.status === 'failed'"
+                    [class.row-refunded]="p.status === 'refunded'"
+                    [class.row-new]="p.isNew && p.status === 'pending'">
                     <td class="id-cell">{{ p.id }}</td>
                     <td class="user-cell">
                         <div class="avatar">{{ p.user[0] }}</div>
@@ -75,20 +80,24 @@
                             <span class="user-email">{{ p.email }}</span>
                         </div>
                     </td>
-                    <td><span class="plan-badge" [class.pro]="p.plan === 'Pro'" [class.elite]="p.plan === 'Premium'">{{
-                            p.plan }}</span></td>
+                    <td><span class="plan-badge" [class.pro]="p.plan === 'Pro'" [class.elite]="p.plan === 'Premium'">{{ p.plan }}</span></td>
                     <td class="amount-cell">{{ p.amount }} {{ p.currency }}</td>
                     <td><span class="method-badge">{{ getMethodIcon(p.method) }} {{ p.method | titlecase }}</span></td>
                     <td>{{ p.date | date:'MMM d, y' }}</td>
-                    <td><span class="badge" [class]="getStatusClass(p.status)">{{ p.status | titlecase }}</span></td>
+                    <td><span class="badge" [class]="getStatusClass(p.status)">{{ p.status | titlecase }}</span>
+                        <span class="new-badge" *ngIf="p.isNew && p.status === 'pending'">NEW</span>
+                    </td>
                     <td class="bo-actions-cell">
                         <button type="button" class="btn-action approve" *ngIf="p.status === 'pending'"
-                            (click)="approve(p)" title="Approuver">✅</button>
+                            (click)="openApprove(p)" title="Approve">✅</button>
                         <button type="button" class="btn-action reject" *ngIf="p.status === 'pending'"
-                            (click)="openReject(p)" title="Rejeter">❌</button>
+                            (click)="openReject(p)" title="Reject">❌</button>
                         <button type="button" class="btn-action view" (click)="viewDetail(p)" title="View Details">👁</button>
-                        <button type="button" class="btn-action edit" *ngIf="p.status === 'completed'" (click)="openRefund(p)"
-                            title="Refund">↩️</button>
+                        <button type="button" class="btn-action edit" (click)="openEdit(p)" title="Edit">✏️</button>
+                        <button type="button" class="btn-action delete" (click)="deletePayment(p)" title="Delete">🗑️</button>
+                        <button type="button" class="btn-action refund"
+                            *ngIf="p.status === 'completed' || p.status === 'approved'"
+                            (click)="openRefund(p)" title="Refund">↩️</button>
                     </td>
                 </tr>
                 <tr *ngIf="filteredPayments.length === 0">
@@ -130,13 +139,11 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Amount</span>
-                    <span class="detail-value amount-val">{{ selectedPayment.amount }} {{ selectedPayment.currency
-                        }}</span>
+                    <span class="detail-value amount-val">{{ selectedPayment.amount }} {{ selectedPayment.currency }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Method</span>
-                    <span class="detail-value">{{ getMethodIcon(selectedPayment.method) }} {{ selectedPayment.method |
-                        titlecase }}</span>
+                    <span class="detail-value">{{ getMethodIcon(selectedPayment.method) }} {{ selectedPayment.method | titlecase }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Date</span>
@@ -144,8 +151,11 @@
                 </div>
                 <div class="detail-item full">
                     <span class="detail-label">Status</span>
-                    <span class="badge" [class]="getStatusClass(selectedPayment.status)">{{ selectedPayment.status |
-                        titlecase }}</span>
+                    <span class="badge" [class]="getStatusClass(selectedPayment.status)">{{ selectedPayment.status | titlecase }}</span>
+                </div>
+                <div class="detail-item full" *ngIf="selectedPayment.rejectionReason">
+                    <span class="detail-label">Rejection Reason</span>
+                    <span class="detail-value" style="color:#ef4444;">{{ selectedPayment.rejectionReason }}</span>
                 </div>
             </div>
         </div>
@@ -168,7 +178,7 @@
             <p class="refund-msg">
                 Refund <strong>{{ paymentToRefund.amount }} {{ paymentToRefund.currency }}</strong>
                 to <strong>{{ paymentToRefund.user }}</strong>?<br>
-                <span class="refund-sub">Payment {{ paymentToRefund.id }} • {{ paymentToRefund.plan }} plan</span>
+                <span class="refund-sub">Payment {{ paymentToRefund.id }} - {{ paymentToRefund.plan }} plan</span>
             </p>
         </div>
         <div class="modal-footer">
@@ -178,42 +188,130 @@
     </div>
 </div>
 
-<!-- Reject modal -->
-<div class="modal-overlay" *ngIf="showRejectModal && paymentToReject" (click)="closeModal()">
+<!-- Approve Payment Modal -->
+<div class="modal-overlay" *ngIf="showApproveModal && paymentToApprove" (click)="closeModal()">
     <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
-        <div class="modal-header warn-header">
-            <h2>❌ Rejeter le paiement</h2>
+        <div class="modal-header success-header">
+            <h2>✅ Approve Payment</h2>
             <button type="button" class="modal-close" (click)="closeModal()">✕</button>
         </div>
         <div class="modal-body">
-            <p class="refund-msg">Paiement <strong>{{ paymentToReject.id }}</strong> — {{ paymentToReject.user }}</p>
-            <label class="reject-label">Motif (visible dans l’email utilisateur)</label>
-            <textarea class="reject-textarea" [(ngModel)]="rejectReason" rows="4"
-                placeholder="Ex. : justificatif manquant, montant incorrect…"></textarea>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">User</span>
+                    <span class="detail-value">{{ paymentToApprove.user }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value">{{ paymentToApprove.email }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Plan</span>
+                    <span class="detail-value"><span class="plan-badge">{{ paymentToApprove.plan }}</span></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Amount</span>
+                    <span class="detail-value amount-val">{{ paymentToApprove.amount }} {{ paymentToApprove.currency }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Method</span>
+                    <span class="detail-value">{{ getMethodIcon(paymentToApprove.method) }} {{ paymentToApprove.method | titlecase }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Reference</span>
+                    <span class="detail-value id-val">{{ paymentToApprove.transactionId }}</span>
+                </div>
+                <div class="detail-item full">
+                    <span class="detail-label">Current Status</span>
+                    <span class="badge badge-warning">PENDING</span>
+                    <span style="margin-left:8px;font-size:0.85rem;color:#9ca3af;">→ will change to</span>
+                    <span class="badge badge-success" style="margin-left:8px;">COMPLETED</span>
+                </div>
+            </div>
+            <p class="info-text" style="margin-top:12px;">
+                By approving, the subscription will be <strong>activated</strong> and the user will receive a <strong>confirmation email</strong>.
+            </p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
-            <button type="button" class="btn-refund" (click)="confirmReject()">Confirmer le rejet</button>
+            <button type="button" class="btn-cancel" (click)="closeModal()" [disabled]="isProcessing">Cancel</button>
+            <button type="button" class="btn-save" (click)="confirmApprove()" [disabled]="isProcessing">
+                <span *ngIf="!isProcessing">✅ Confirm Approval</span>
+                <span *ngIf="isProcessing">Processing...</span>
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Add Payment Modal -->
+<!-- Reject Payment Modal -->
+<div class="modal-overlay" *ngIf="showRejectModal && paymentToReject" (click)="closeModal()">
+    <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header warn-header">
+            <h2>❌ Reject Payment</h2>
+            <button type="button" class="modal-close" (click)="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">User</span>
+                    <span class="detail-value">{{ paymentToReject.user }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Amount</span>
+                    <span class="detail-value amount-val">{{ paymentToReject.amount }} {{ paymentToReject.currency }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Plan</span>
+                    <span class="detail-value">{{ paymentToReject.plan }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Method</span>
+                    <span class="detail-value">{{ getMethodIcon(paymentToReject.method) }} {{ paymentToReject.method | titlecase }}</span>
+                </div>
+                <div class="detail-item full">
+                    <span class="detail-label">Current Status</span>
+                    <span class="badge badge-warning">PENDING</span>
+                    <span style="margin-left:8px;font-size:0.85rem;color:#9ca3af;">→ will change to</span>
+                    <span class="badge badge-danger" style="margin-left:8px;">FAILED</span>
+                </div>
+            </div>
+            <div style="margin-top:14px;">
+                <label class="reject-label">
+                    Rejection Reason <span style="color:#ef4444;">*</span>
+                    <span style="font-size:0.75rem;color:#9ca3af;"> (sent to the user by email)</span>
+                </label>
+                <textarea class="reject-textarea" [(ngModel)]="rejectReason" rows="3"
+                    placeholder="e.g. Missing proof of payment, incorrect amount, unidentified transfer..."></textarea>
+                <p *ngIf="rejectReasonError" style="color:#ef4444;font-size:0.8rem;margin-top:4px;">
+                    ⚠️ A rejection reason is required.
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeModal()" [disabled]="isProcessing">Cancel</button>
+            <button type="button" class="btn-refund" (click)="confirmReject()" [disabled]="isProcessing">
+                <span *ngIf="!isProcessing">❌ Confirm Rejection</span>
+                <span *ngIf="isProcessing">Processing...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Payment Modal -->
 <div class="modal-overlay" *ngIf="showAddModal" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2>➕ Add Payment</h2>
+            <h2>➕ {{ isEditMode ? 'Edit Payment' : 'Add Payment' }}</h2>
             <button class="modal-close" (click)="closeModal()">✕</button>
         </div>
         <div class="modal-body">
             <form (ngSubmit)="savePayment()" class="form-grid">
                 <div class="form-group full">
                     <label>User Name</label>
-                    <input type="text" [(ngModel)]="newPayment.user" name="user" placeholder="e.g. Flen Ben Flen" required>
+                    <input type="text" [(ngModel)]="newPayment.user" name="user" placeholder="e.g. John Doe" required>
                 </div>
                 <div class="form-group full">
                     <label>Email Address</label>
-                    <input type="email" [(ngModel)]="newPayment.email" name="email" placeholder="e.g. email@example.com" required>
+                    <input type="email" [(ngModel)]="newPayment.email" name="email" placeholder="e.g. john@example.com" required>
                 </div>
                 <div class="form-group">
                     <label>Plan</label>
@@ -231,7 +329,7 @@
                     <select [(ngModel)]="newPayment.method" name="method">
                         <option value="card">Card</option>
                         <option value="paypal">PayPal</option>
-                        <option value="bank_transfer">Virement</option>
+                        <option value="bank_transfer">Bank Transfer</option>
                         <option value="mobile">Mobile</option>
                     </select>
                 </div>

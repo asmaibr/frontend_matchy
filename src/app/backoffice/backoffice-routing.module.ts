@@ -11,15 +11,12 @@ import { BoProfileSettingsComponent } from './profile-settings/profile-settings.
 import { BoProjectsMilestonesComponent } from './projects-milestones/projects-milestones.component';
 import { BoSubscriptionManagementComponent } from './subscription-management/subscription-management.component';
 import { UserManagementComponent } from './user-management/user-management.component';
-import { RegistrationsComponent } from './registrations/registrations.component';
-import { CategoriesComponent } from './categories/categories.component';
-import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { BoSubscriptionPlanComponent } from './subscription-plan/subscription-plan.component';
 import { SubscriptionPlanComparisonComponent } from './subscription-plan/subscription-plan-comparison/subscription-plan-comparison.component';
 import { BoSubscriptionPayComponent } from './subscription-pay/subscription-pay.component';
 import { BoSubscriptionDashboardComponent } from './subscription-dashboard/subscription-dashboard.component';
 import { AdminGuard } from '../core/guards/auth.guard';
+
 import { CompanyProjectsComponent } from './company-projects/company-projects.component';
 import { ProjectMilestonesManagerComponent } from './project-milestones-manager/project-milestones-manager.component';
 import { ReviewApplicationsComponent } from './review-applications/review-applications.component';
@@ -30,29 +27,23 @@ import { ContentManagementComponent } from './content-management/content-managem
 import { AssessmentManagementComponent } from './assessment-management/assessment-management.component';
 import { CertificationManagementComponent } from './certification-management/certification-management.component';
 
+
 const routes: Routes = [
-  { path: 'login', component: BoLoginComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
+  {
+    path: 'login',
+    component: BoLoginComponent
+  },
   {
     path: '',
     component: BoLayoutComponent,
-    canActivate: [AdminGuard],
+    // canActivate: [AdminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'notifications', component: BoNotificationsComponent },
-      { path: 'history', component: BoHistoryComponent },
-      { path: 'workspace-manager', component: WorkspaceManagerComponent },
       { path: 'users', component: UsersComponent },
       { path: 'projects', component: ProjectsComponent },
-      { path: 'company-projects', component: CompanyProjectsComponent },
-      { path: 'company-projects/:projectId/review', component: ReviewApplicationsComponent },
-      { path: 'company-projects/:projectId/milestones', component: ProjectMilestonesManagerComponent },
-      { path: 'categories', component: CategoriesComponent },
       { path: 'courses-resources', component: BoCoursesResourcesComponent },
       { path: 'events', component: BoEventsComponent },
-      { path: 'registrations', component: RegistrationsComponent },
       { path: 'profile-settings', component: BoProfileSettingsComponent },
       { path: 'projects-milestones', component: BoProjectsMilestonesComponent },
       { path: 'subscription-management', component: BoSubscriptionManagementComponent },
@@ -72,4 +63,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class BackofficeRoutingModule {}
+export class BackofficeRoutingModule { }

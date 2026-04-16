@@ -39,6 +39,7 @@ export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
 export interface Payment {
   id?: number;
   subscription?: any;
+  user?: any;
   amount: number;
   amountOriginalTnd?: number;
   currency: string;
@@ -61,6 +62,10 @@ export interface Payment {
   transferReference?: string;
   promoCode?: string;
   discountAmountTnd?: number;
+  submittedAt?: Date | string | null;
+  approvedAt?: Date | string | null;
+  approvedBy?: any;
+  adminNotes?: string;
 }
 
 export interface PaymentResponse {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { catchError, delay, map, switchMap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import {
   SubscriptionPlan, Subscription, Payment, PaymentResponse,
   SubscriptionStatus, PaymentStatus, PaymentMethod, PaymentPayload, PaymentCurrency
@@ -10,7 +11,9 @@ import { CurrencyService } from './currency.service';
 @Injectable({ providedIn: 'root' })
 export class SubscriptionService {
 
-  constructor(private readonly currencyService: CurrencyService) {
+  private readonly API_URL = 'http://localhost:8081'; // Adjust based on your backend URL
+
+  constructor(private readonly currencyService: CurrencyService, private http: HttpClient) {
     this.loadFromLocalStorage();
   }
 
@@ -132,22 +135,101 @@ export class SubscriptionService {
     return map[m] ?? 'card';
   }
 
+  createPayment(payment: Payment): Observable<any> {
+    return this.http.post(`${this.API_URL}/payment`, payment);
+  }
+
+  // localStorage key for offline payments
+  private readonly LOCAL_PAYMENTS_KEY = 'matchy_local_payments';
+
+  private savePaymentLocally(payment: Payment, ref: string, userId: number): void {
+    try {
+      const existing = JSON.parse(localStorage.getItem(this.LOCAL_PAYMENTS_KEY) || '[]');
+      existing.unshift({
+        id: 'LOCAL-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
+        user: 'User #' + userId,
+        email: '',
+        plan: payment.subscription?.plan?.name || 'Unknown',
+        amount: payment.amountOriginalTnd ?? payment.amount,
+        currency: 'TND',
+        method: (payment.method || 'CARD').toLowerCase(),
+        status: 'pending',
+        date: new Date().toISOString().split('T')[0],
+        transactionId: ref,
+        submittedAt: new Date().toISOString().split('T')[0]
+      });
+      localStorage.setItem(this.LOCAL_PAYMENTS_KEY, JSON.stringify(existing));
+    } catch { /* ignore */ }
+  }
+
+  getLocalPayments(): any[] {
+    try {
+      return JSON.parse(localStorage.getItem(this.LOCAL_PAYMENTS_KEY) || '[]');
+    } catch { return []; }
+  }
+
+  clearLocalPayments(): void {
+    localStorage.removeItem(this.LOCAL_PAYMENTS_KEY);
+  }
+
   processPayment(payment: Payment, userId: string): Observable<PaymentResponse> {
     const ref = `TXN-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-    const payload: PaymentPayload = {
-      planId: String(payment.subscription?.plan?.id ?? ''),
-      amount: payment.amount,
-      currency: payment.currency as PaymentCurrency,
-      paymentMethod: this.toApiMethod(payment.method),
-      userId, transactionRef: ref, promoCode: payment.promoCode
-    };
-    console.log('[PaymentPayload]', payload);
-    return of({
-      success: true,
-      message: 'Payment successful! Your subscription is now active.',
-      paymentId: 'PAY-' + Math.random().toString(36).substring(2, 11).toUpperCase(),
-      transactionId: ref, transactionRef: ref
-    }).pipe(delay(1500));
+    const numericUserId = userId && userId !== 'guest' ? Number(userId) : 1;
+    const planId = payment.subscription?.plan?.id;
+    const numericPlanId = planId && !isNaN(Number(planId)) ? Number(planId) : null;
+
+    const createSubscription$ = this.http.post<any>(`${this.API_URL}/subscriptions`, {
+      priceAtPurchase: payment.amountOriginalTnd ?? payment.amount,
+      startDate: new Date().toISOString(),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      // Don't force status — backend decides (TRIAL for PRO/PREMIUM, PENDING otherwise)
+      userId: numericUserId,
+      plan: numericPlanId ? { id: numericPlanId } : null,
+      planName: payment.subscription?.plan?.name?.toUpperCase() ?? null
+    });
+
+    return createSubscription$.pipe(
+      switchMap((createdSub: any) => {
+        const paymentPayload = {
+          amount: payment.amountOriginalTnd ?? payment.amount,
+          currency: 'TND',
+          method: payment.method,
+          status: 'PENDING',
+          transactionRef: ref,
+          cardholderName: payment.cardholderName,
+          paypalEmail: payment.paypalEmail,
+          mobileProvider: payment.mobileProvider,
+          mobilePhone: payment.mobilePhone,
+          bankName: payment.bankName,
+          rib: payment.rib,
+          accountHolder: payment.accountHolder,
+          subscription: { id: createdSub.id },
+          userId: numericUserId,
+          promoCode: payment.promoCode,
+          discountAmountTnd: payment.discountAmountTnd
+        };
+        return this.http.post<any>(`${this.API_URL}/payment`, paymentPayload);
+      }),
+      map((res): PaymentResponse => ({
+        success: true,
+        message: 'Your payment has been submitted and is awaiting admin confirmation. You will receive a confirmation email once approved.',
+        paymentId: String(res.id),
+        transactionId: res.transactionRef || ref,
+        transactionRef: res.transactionRef || ref
+      })),
+      catchError((err) => {
+        console.warn('[processPayment] backend unavailable — saving locally:', err?.message);
+        // Save to localStorage so backoffice can show it even without backend
+        this.savePaymentLocally(payment, ref, numericUserId);
+        return of<PaymentResponse>({
+          success: true,
+          message: 'Your payment has been submitted and is awaiting admin confirmation. You will receive a confirmation email once approved.',
+          paymentId: 'PAY-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
+          transactionId: ref,
+          transactionRef: ref
+        });
+      })
+    );
   }
 
   activateSubscription(subscription: Subscription): Subscription {

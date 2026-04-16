@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["angular:styles/component:css;ebc3e21f21aa3e816b45b8e38dfc59bda5a02d8c23bd65b38fa7d072b0bb2cf8;C:/Users/abdellah/Desktop/matchy-angular (1)/matchy-angular/frontend/src/app/client/layout/cl-header/cl-header.component.ts"],
-  "sourcesContent": ["\n    .cl-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: var(--bo-bg-secondary); border-bottom: 1px solid var(--bo-border); }\n    .page-context { font-size: 16px; font-weight: 600; color: var(--bo-text-primary); }\n    .header-right { display: flex; align-items: center; gap: 14px; }\n    .user-greeting { font-size: 14px; color: var(--bo-text-secondary); }\n    .btn-outline { padding: 7px 14px; font-size: 13px; border: 1px solid var(--bo-border); border-radius: 6px; background: transparent; color: var(--bo-text-secondary); cursor: pointer; transition: all 0.2s; }\n    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }\n  "],
-  "mappings": ";AACI,CAAC;AAAY,WAAS;AAAM,eAAa;AAAQ,mBAAiB;AAAe,WAAS,KAAK;AAAM,cAAY,IAAI;AAAoB,iBAAe,IAAI,MAAM,IAAI;AAAc;AACpL,CAAC;AAAe,aAAW;AAAM,eAAa;AAAK,SAAO,IAAI;AAAoB;AAClF,CAAC;AAAe,WAAS;AAAM,eAAa;AAAQ,OAAK;AAAM;AAC/D,CAAC;AAAgB,aAAW;AAAM,SAAO,IAAI;AAAsB;AACnE,CAAC;AAAc,WAAS,IAAI;AAAM,aAAW;AAAM,UAAQ,IAAI,MAAM,IAAI;AAAc,iBAAe;AAAK,cAAY;AAAa,SAAO,IAAI;AAAsB,UAAQ;AAAS,cAAY,IAAI;AAAM;AAC5M,CADC,WACW;AAAS,gBAAc,IAAI;AAAY,SAAO,IAAI;AAAY;",
-  "names": []
-}
