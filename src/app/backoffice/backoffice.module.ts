@@ -5,7 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 import { BackofficeRoutingModule } from './backoffice-routing.module';
-import { FrontofficeModule } from '../frontoffice/frontoffice.module';
 import { SharedModule } from '../shared/shared.module';
 
 // Layout
@@ -51,6 +50,11 @@ import { EditEventModalComponent } from './events/edit-event-modal/edit-event-mo
 // Wallet
 import { WalletAdminComponent } from './wallet/wallet.component';
 
+// Content management
+import { ContentManagementComponent } from './content-management/content-management.component';
+import { AssessmentManagementComponent } from './assessment-management/assessment-management.component';
+import { CertificationManagementComponent } from './certification-management/certification-management.component';
+
 @NgModule({
   declarations: [
     BoLayoutComponent,
@@ -85,7 +89,10 @@ import { WalletAdminComponent } from './wallet/wallet.component';
     RegistrationsComponent,
     CreateEventModalComponent,
     ViewEventModalComponent,
-    EditEventModalComponent
+    EditEventModalComponent,
+    ContentManagementComponent,
+    AssessmentManagementComponent,
+    CertificationManagementComponent
   ],
   imports: [
     CommonModule,
@@ -94,7 +101,6 @@ import { WalletAdminComponent } from './wallet/wallet.component';
     ReactiveFormsModule,
     HttpClientModule,
     BackofficeRoutingModule,
-    FrontofficeModule,
     SharedModule
   ]
 })

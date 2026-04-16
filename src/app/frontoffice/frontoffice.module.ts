@@ -20,10 +20,6 @@ import { ProfileSettingsComponent } from './profile-settings/profile-settings.co
 import { ProjectsMilestonesComponent } from './projects-milestones/projects-milestones.component';
 import { SubscriptionManagementComponent } from './subscription-management/subscription-management.component';
 import { SubscriptionAbonnementComponent } from './subscription-abonnement/subscription-abonnement.component';
-import { SubscriptionPaymentComponent } from './subscription-payment/subscription-payment.component';
-import { CurrencySelectorComponent } from './components/currency-selector/currency-selector.component';
-import { PaymentSuccessModalComponent } from './components/payment-success-modal/payment-success-modal.component';
-import { JobSelectorComponent } from './components/job-selector/job-selector.component';
 import { MySubscriptionComponent } from './my-subscription/my-subscription.component';
 import { AvailableProjectsComponent } from './available-projects/available-projects.component';
 import { ProjectDetailsComponent } from './project-details/project-details.component';
@@ -32,6 +28,12 @@ import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendati
 import { RegisterComponent } from './register/register.component';
 import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
 import { RegistrationModalComponent } from './events/registration-modal/registration-modal.component';
+import { ContentListComponent } from './content-list/content-list.component';
+import { ContentDetailComponent } from './content-detail/content-detail.component';
+import { FavoritesComponent } from './favorites/favorites.component';
+
+import { AssessmentTestComponent } from './assessment-test/assessment-test.component';
+import { NotificationPanelComponent } from './shared/notification-panel/notification-panel.component';
 
 @NgModule({
   declarations: [
@@ -46,10 +48,6 @@ import { RegistrationModalComponent } from './events/registration-modal/registra
     ProjectsMilestonesComponent,
     SubscriptionManagementComponent,
     SubscriptionAbonnementComponent,
-    SubscriptionPaymentComponent,
-    CurrencySelectorComponent,
-    PaymentSuccessModalComponent,
-    JobSelectorComponent,
     MySubscriptionComponent,
     AvailableProjectsComponent,
     ProjectDetailsComponent,
@@ -57,9 +55,13 @@ import { RegistrationModalComponent } from './events/registration-modal/registra
     AiRecommendationsComponent,
     RegisterComponent,
     ChatAssistantComponent,
-    RegistrationModalComponent
-  ],
-  imports: [
+    RegistrationModalComponent,
+    ContentListComponent,
+    ContentDetailComponent,
+    FavoritesComponent,
+    AssessmentTestComponent,
+    NotificationPanelComponent
+  ],  imports: [
     CommonModule,
     RouterModule,
     FormsModule,
@@ -67,11 +69,6 @@ import { RegistrationModalComponent } from './events/registration-modal/registra
     FrontofficeRoutingModule,
     SharedModule
   ],
-  exports: [
-    SubscriptionPaymentComponent,
-    CurrencySelectorComponent,
-    PaymentSuccessModalComponent,
-    JobSelectorComponent
-  ]
+  exports: []
 })
 export class FrontofficeModule {}

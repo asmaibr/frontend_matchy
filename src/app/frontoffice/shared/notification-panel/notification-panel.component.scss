@@ -1,0 +1,180 @@
+.notifications-container {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-notifications {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+
+  &:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f8fafc;
+  }
+
+  .badge {
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 380px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+
+  h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+
+  .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+  .btn-mark-all {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { background: #5a67d8; }
+  }
+
+  .btn-close {
+    background: #e2e8f0;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #64748b;
+    &:hover { background: #cbd5e1; }
+  }
+}
+
+.notifications-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s;
+
+  &:hover { background: #f8fafc; }
+  &.unread { background: #eff6ff; border-left: 3px solid #667eea; }
+  &.type-certificate { background: #f0fdf4; border-left: 3px solid #10b981; }
+
+  .notification-content {
+    display: flex;
+    gap: 0.75rem;
+    flex: 1;
+
+    .notification-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+    .notification-text {
+      flex: 1;
+      .notification-title { margin: 0 0 0.25rem; font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+      .notification-message { margin: 0 0 0.25rem; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
+      .notification-time { font-size: 0.75rem; color: #94a3b8; }
+    }
+  }
+
+  .notification-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+
+    .btn-read {
+      background: #667eea;
+      color: white;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.2rem;
+      border-radius: 4px;
+      &:hover { color: #ef4444; background: #fee2e2; }
+    }
+  }
+}
+
+.notifications-empty {
+  padding: 2rem;
+  text-align: center;
+  .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  p { color: #94a3b8; margin: 0; }
+}
+
+.notifications-footer {
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+
+  .btn-clear-all {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.notifications-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}

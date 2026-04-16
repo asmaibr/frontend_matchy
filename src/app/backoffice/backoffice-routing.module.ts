@@ -26,6 +26,9 @@ import { ReviewApplicationsComponent } from './review-applications/review-applic
 import { BoNotificationsComponent } from './notifications/notifications.component';
 import { BoHistoryComponent } from './history/history.component';
 import { WorkspaceManagerComponent } from './workspace-manager/workspace-manager.component';
+import { ContentManagementComponent } from './content-management/content-management.component';
+import { AssessmentManagementComponent } from './assessment-management/assessment-management.component';
+import { CertificationManagementComponent } from './certification-management/certification-management.component';
 
 const routes: Routes = [
   { path: 'login', component: BoLoginComponent },
@@ -57,7 +60,10 @@ const routes: Routes = [
       { path: 'subscription-plan', component: BoSubscriptionPlanComponent },
       { path: 'subscription-plan-comparison', component: SubscriptionPlanComparisonComponent },
       { path: 'subscription-pay', component: BoSubscriptionPayComponent },
-      { path: 'subscriptions/dashboard', component: BoSubscriptionDashboardComponent }
+      { path: 'subscriptions/dashboard', component: BoSubscriptionDashboardComponent },
+      { path: 'content-management', component: ContentManagementComponent },
+      { path: 'assessment-management', component: AssessmentManagementComponent },
+      { path: 'certification-management', component: CertificationManagementComponent },
     ]
   }
 ];

@@ -1,0 +1,47 @@
+<div class="notifications-container">
+  <button class="btn-notifications" (click)="toggleDropdown()">
+    🔔 Notifications
+    <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+  </button>
+
+  <div class="notifications-dropdown" *ngIf="showDropdown" [@slideDown]>
+    <div class="notifications-header">
+      <h3>Notifications</h3>
+      <div class="header-actions">
+        <button *ngIf="unreadCount > 0" class="btn-mark-all" (click)="markAllAsRead()">✓ Mark all read</button>
+        <button class="btn-close" (click)="toggleDropdown()">✕</button>
+      </div>
+    </div>
+
+    <div class="notifications-list" *ngIf="notifications.length > 0; else emptyState">
+      <div *ngFor="let notif of notifications" class="notification-item"
+           [class.unread]="!notif.read" [class.type-certificate]="notif.type === 'certificate'">
+        <div class="notification-content">
+          <div class="notification-icon">{{ notif.icon }}</div>
+          <div class="notification-text">
+            <h4 class="notification-title">{{ notif.title }}</h4>
+            <p class="notification-message">{{ notif.message }}</p>
+            <span class="notification-time">{{ getTimeAgo(notif.timestamp) }}</span>
+          </div>
+        </div>
+        <div class="notification-actions">
+          <button *ngIf="!notif.read" class="btn-read" (click)="markAsRead(notif.id)" title="Mark as read">•</button>
+          <button class="btn-delete" (click)="deleteNotification(notif.id)" title="Delete">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="notifications-empty">
+        <div class="empty-icon">📭</div>
+        <p>No notifications yet</p>
+      </div>
+    </ng-template>
+
+    <div *ngIf="notifications.length > 0" class="notifications-footer">
+      <button class="btn-clear-all" (click)="clearAll()">Clear all notifications</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showDropdown" class="notifications-backdrop" (click)="toggleDropdown()"></div>

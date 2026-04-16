@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 import { CustomDatepickerComponent } from './components/custom-datepicker/custom-datepicker.component';
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.component';
@@ -11,6 +12,10 @@ import { EventStatisticsPanelComponent } from './components/event-statistics-pan
 import { LocationMapComponent } from './components/location-map/location-map.component';
 import { SafePipe } from './pipes/safe.pipe';
 import { LocationIconComponent } from './components/location-icon/location-icon.component';
+import { SubscriptionPaymentComponent } from '../frontoffice/subscription-payment/subscription-payment.component';
+import { CurrencySelectorComponent } from '../frontoffice/components/currency-selector/currency-selector.component';
+import { PaymentSuccessModalComponent } from '../frontoffice/components/payment-success-modal/payment-success-modal.component';
+import { JobSelectorComponent } from '../frontoffice/components/job-selector/job-selector.component';
 
 @NgModule({
   declarations: [
@@ -22,12 +27,18 @@ import { LocationIconComponent } from './components/location-icon/location-icon.
     EventStatisticsPanelComponent,
     LocationMapComponent,
     SafePipe,
-    LocationIconComponent
+    LocationIconComponent,
+    SubscriptionPaymentComponent,
+    CurrencySelectorComponent,
+    PaymentSuccessModalComponent,
+    JobSelectorComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule
+    ReactiveFormsModule,
+    RouterModule,
+    HttpClientModule
   ],
   exports: [
     ThemeToggleComponent,
@@ -38,7 +49,11 @@ import { LocationIconComponent } from './components/location-icon/location-icon.
     EventStatisticsPanelComponent,
     LocationMapComponent,
     LocationIconComponent,
-    SafePipe
+    SafePipe,
+    SubscriptionPaymentComponent,
+    CurrencySelectorComponent,
+    PaymentSuccessModalComponent,
+    JobSelectorComponent
   ]
 })
 export class SharedModule {}

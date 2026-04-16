@@ -17,8 +17,13 @@ import { ProjectDetailsComponent } from './project-details/project-details.compo
 import { MyApplicationsComponent } from './my-applications/my-applications.component';
 import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
 import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
+import { ContentListComponent } from './content-list/content-list.component';
+import { ContentDetailComponent } from './content-detail/content-detail.component';
+import { FavoritesComponent } from './favorites/favorites.component';
+import { AssessmentTestComponent } from './assessment-test/assessment-test.component';
 
 const routes: Routes = [
+  // Layout wrapper for main frontoffice pages
   {
     path: '',
     component: FoLayoutComponent,
@@ -42,7 +47,12 @@ const routes: Routes = [
       { path: 'subscription-abonnement/:planId/:planName', component: SubscriptionAbonnementComponent },
       { path: 'subscription-payment/:subscriptionId', component: SubscriptionPaymentComponent },
     ]
-  }
+  },
+  // Content routes — each has its own navbar/footer, no layout wrapper needed
+  { path: 'content-list', component: ContentListComponent },
+  { path: 'content-list/favorites', component: FavoritesComponent },
+  { path: 'content-list/assessment/:contentId', component: AssessmentTestComponent },
+  { path: 'content-list/content/:id', component: ContentDetailComponent },
 ];
 
 @NgModule({

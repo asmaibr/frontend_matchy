@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;410830d4c3513aea95c29a991c0cd569d97372c52bad5278a61c0f121af170e1;C:/Users/abdellah/Desktop/matchy-angular (1)/matchy-angular/frontend/src/app/freelancer/layout/fl-layout.component.ts"],
+  "sourcesContent": ["\n    .fl-layout {\n      display: flex;\n      flex-direction: column;\n      min-height: 100vh;\n      background: var(--bo-bg-primary);\n      font-family: var(--font-body);\n    }\n    .fl-content {\n      flex: 1;\n      padding: 28px 32px;\n      overflow-y: auto;\n      max-width: 1400px;\n      width: 100%;\n      margin: 0 auto;\n      box-sizing: border-box;\n    }\n    @media (max-width: 768px) {\n      .fl-content { padding: 16px; }\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,WAAS;AACT,kBAAgB;AAChB,cAAY;AACZ,cAAY,IAAI;AAChB,eAAa,IAAI;AACnB;AACA,CAAC;AACC,QAAM;AACN,WAAS,KAAK;AACd,cAAY;AACZ,aAAW;AACX,SAAO;AACP,UAAQ,EAAE;AACV,cAAY;AACd;AACA,OAAO,CAAC,SAAS,EAAE;AACjB,GAVD;AAUe,aAAS;AAAM;AAC/B;",
+  "names": []
+}
