@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NotificationsService } from '../../frontoffice/services/notifications.service';
-import { AuthService } from '../../frontoffice/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Notification } from '../../frontoffice/models/notification.model';
 
 @Component({
@@ -15,22 +15,29 @@ export class BoHistoryComponent implements OnInit {
 
   constructor(
     private notificationsService: NotificationsService,
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    console.log('BoHistoryComponent initialized');
+    console.log('Current user:', this.authService.currentUser);
     this.loadHistory();
   }
 
   loadHistory(): void {
-    if (this.authService.currentUser) {
-      this.notificationsService.getNotifications(this.authService.currentUser.id, 'company')
-        .subscribe(notifications => {
+    console.log('📢 Loading ALL notifications history from database');
+    this.notificationsService.getAllNotifications()
+      .subscribe(
+        notifications => {
+          console.log('✅ All history notifications loaded:', notifications);
           this.allNotifications = notifications;
           this.groupByDate();
-        });
-    }
+        },
+        error => {
+          console.error('❌ Error loading history:', error);
+        }
+      );
   }
 
   groupByDate(): void {

@@ -185,10 +185,35 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
   }
 
   private redirectByRole(): void {
-    if (this.authService.isAdmin())           this.router.navigate(['/backoffice/dashboard']);
-    else if (this.authService.isClient())     this.router.navigate(['/client/dashboard']);
-    else if (this.authService.isFreelancer()) this.router.navigate(['/freelancer/dashboard']);
-    else                                      this.router.navigate(['/']);
+    // Check if there's a stored redirect URL
+    const redirectUrl = this.authService.getRedirectUrl();
+    if (redirectUrl) {
+      this.authService.clearRedirectUrl();
+      this.router.navigateByUrl(redirectUrl);
+      return;
+    }
+
+    // Check user role and redirect accordingly
+    if (this.authService.currentUser) {
+      const role = this.authService.currentUser.role;
+      
+      if (role === 'ADMIN') {
+        // Admin users go to backoffice dashboard
+        this.router.navigate(['/backoffice/dashboard']);
+      } else if (role === 'CLIENT') {
+        // Client users go to client dashboard
+        this.router.navigate(['/client/dashboard']);
+      } else if (role === 'FREELANCER') {
+        // Freelancer users go to freelancer dashboard
+        this.router.navigate(['/freelancer/dashboard']);
+      } else {
+        // Default to landing page for unknown roles
+        this.router.navigate(['/']);
+      }
+    } else {
+      // No user info, default to landing page
+      this.router.navigate(['/']);
+    }
   }
 
   toggleTheme(): void {

@@ -4,7 +4,7 @@ import { MilestoneApplication, ProjectMilestone } from '../models/milestone.mode
 import { CompanyProject } from '../models/project.model';
 import { MilestonesService } from '../services/milestones.service';
 import { CompanyProjectsService } from '../services/company-projects.service';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { WorkspaceService, ChatMessage, TeamMember, WorkSubmission } from '../services/workspace.service';
 import { Subscription } from 'rxjs';
 
@@ -50,7 +50,12 @@ export class MyApplicationsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Check auth first
+    this.authService.checkAuth();
+    
     if (!this.authService.isAuthenticated || !this.authService.currentUser) {
+      // Store current URL before redirecting to login
+      this.authService.setRedirectUrl(this.router.url);
       this.router.navigate(['/backoffice/login']);
       return;
     }
@@ -65,19 +70,57 @@ export class MyApplicationsComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
+    console.log('Loading data...');
+    console.log('Current user:', this.authService.currentUser);
+    
     if (this.authService.currentUser) {
-      this.projectsService.getProjects().subscribe(projects => {
-        projects.forEach(p => this.projects.set(p.id, p));
+      // Add error handling to prevent lag from failed API calls
+      this.projectsService.getProjects().subscribe({
+        next: (projects) => {
+          console.log('Projects loaded:', projects.length);
+          projects.forEach(p => this.projects.set(p.id, p));
+        },
+        error: (err) => {
+          console.error('Failed to load projects:', err);
+        }
       });
 
-      this.milestonesService.getAllMilestones().subscribe(milestones => {
-        milestones.forEach(m => this.milestones.set(m.id, m));
+      this.milestonesService.getAllMilestones().subscribe({
+        next: (milestones) => {
+          console.log('Milestones loaded:', milestones.length);
+          milestones.forEach(m => this.milestones.set(m.id, m));
+        },
+        error: (err) => {
+          console.error('Failed to load milestones:', err);
+        }
       });
 
-      this.milestonesService.getApplicationsByFreelancer(this.authService.currentUser.id).subscribe(applications => {
-        this.applications = applications;
+      // Check if currentUser.id exists and is valid
+      const userId = this.authService.currentUser.id;
+      console.log('User ID:', userId, 'Type:', typeof userId);
+      
+      if (userId) {
+        const numericUserId = Number(userId);
+        console.log('Fetching applications for user:', numericUserId);
+        
+        this.milestonesService.getApplicationsByFreelancer(numericUserId).subscribe({
+          next: (applications) => {
+            console.log('Applications loaded:', applications);
+            this.applications = applications;
+            this.applyFilters();
+          },
+          error: (err) => {
+            console.error('Failed to load applications:', err);
+            // Set empty array to prevent undefined errors
+            this.applications = [];
+            this.applyFilters();
+          }
+        });
+      } else {
+        console.warn('User ID not available');
+        this.applications = [];
         this.applyFilters();
-      });
+      }
     }
   }
 
@@ -128,15 +171,28 @@ export class MyApplicationsComponent implements OnInit, OnDestroy {
   loadWorkspaceData(): void {
     if (!this.selectedApplication) return;
 
-    // Load team members
-    this.workspaceService.getTeamMembers(this.selectedApplication.milestoneId).subscribe(team => {
-      this.teamMembers = team;
+    // Load team members with error handling
+    this.workspaceService.getTeamMembers(this.selectedApplication.milestoneId).subscribe({
+      next: (team) => {
+        this.teamMembers = team;
+      },
+      error: (err) => {
+        console.error('Failed to load team members:', err);
+        this.teamMembers = [];
+      }
     });
 
-    // Load my submissions
+    // Load my submissions with error handling
     if (this.authService.currentUser) {
-      this.workspaceService.getMySubmissions(this.authService.currentUser.id).subscribe(submissions => {
-        this.mySubmissions = submissions.filter(s => s.milestone_id === this.selectedApplication?.milestoneId);
+      const userId = Number(this.authService.currentUser.id);
+      this.workspaceService.getMySubmissions(userId).subscribe({
+        next: (submissions) => {
+          this.mySubmissions = submissions.filter(s => s.milestone_id === this.selectedApplication?.milestoneId);
+        },
+        error: (err) => {
+          console.error('Failed to load submissions:', err);
+          this.mySubmissions = [];
+        }
       });
     }
   }
@@ -156,24 +212,42 @@ export class MyApplicationsComponent implements OnInit, OnDestroy {
       this.chatSubscription.unsubscribe();
     }
 
+    // Add error handling to prevent continuous failed polling
     this.chatSubscription = this.workspaceService.pollChatMessages(this.selectedApplication.milestoneId)
-      .subscribe(messages => {
-        this.chatMessages = messages;
-        setTimeout(() => this.scrollChatToBottom(), 100);
+      .subscribe({
+        next: (messages) => {
+          this.chatMessages = messages;
+          setTimeout(() => this.scrollChatToBottom(), 100);
+        },
+        error: (err) => {
+          console.error('Failed to load chat messages:', err);
+          this.chatMessages = [];
+          // Unsubscribe on error to prevent continuous failed requests
+          if (this.chatSubscription) {
+            this.chatSubscription.unsubscribe();
+          }
+        }
       });
   }
 
   sendMessage(): void {
     if (!this.newMessage.trim() || !this.selectedApplication || !this.authService.currentUser) return;
 
+    const userId = Number(this.authService.currentUser.id);
     this.workspaceService.sendMessage(
       this.selectedApplication.milestoneId,
-      this.authService.currentUser.id,
+      userId,
       this.authService.currentUser.name,
       'freelancer',
       this.newMessage
-    ).subscribe(() => {
-      this.newMessage = '';
+    ).subscribe({
+      next: () => {
+        this.newMessage = '';
+      },
+      error: (err) => {
+        console.error('Failed to send message:', err);
+        alert('Failed to send message. Please try again.');
+      }
     });
   }
 
@@ -190,24 +264,31 @@ export class MyApplicationsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const userId = Number(this.authService.currentUser.id);
     const submission = {
       application_id: this.selectedApplication.id,
       milestone_id: this.selectedApplication.milestoneId,
-      freelancer_id: this.authService.currentUser.id,
+      freelancer_id: userId,
       ...this.submissionForm
     };
 
-    this.workspaceService.submitWork(submission).subscribe(() => {
-      alert('Work submitted successfully!');
-      this.submissionForm = {
-        title: '',
-        description: '',
-        file_url: '',
-        file_name: '',
-        file_type: ''
-      };
-      this.loadWorkspaceData();
-      this.activeTab = 'submissions';
+    this.workspaceService.submitWork(submission).subscribe({
+      next: () => {
+        alert('Work submitted successfully!');
+        this.submissionForm = {
+          title: '',
+          description: '',
+          file_url: '',
+          file_name: '',
+          file_type: ''
+        };
+        this.loadWorkspaceData();
+        this.activeTab = 'submissions';
+      },
+      error: (err) => {
+        console.error('Failed to submit work:', err);
+        alert('Failed to submit work. Please try again.');
+      }
     });
   }
 

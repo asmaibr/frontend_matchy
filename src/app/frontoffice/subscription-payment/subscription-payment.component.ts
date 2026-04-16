@@ -5,7 +5,7 @@ import {
 } from '../models/subscription.model';
 import { SubscriptionService } from '../services/subscription.service';
 import { CurrencyService } from '../services/currency.service';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PdfService } from '../services/pdf.service';
 import { PromoCodeService, PromoValidationResult } from '../services/promo-code.service';
 

@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../frontoffice/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { NotificationsService } from '../../../frontoffice/services/notifications.service';
 import { Notification } from '../../../frontoffice/models/notification.model';
 import { Subscription } from 'rxjs';
@@ -25,9 +25,9 @@ export class FoNavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated && this.authService.currentUser) {
+    if (this.authService.isAuthenticated && this.authService.currentUser?.id) {
       this.loadNotifications();
-      this.notificationsService.startPolling(this.authService.currentUser.id, 'freelancer');
+      this.notificationsService.startPolling(Number(this.authService.currentUser.id), 'freelancer');
       
       const sub = this.notificationsService.unreadCount$.subscribe(count => {
         this.unreadCount = count;
@@ -65,8 +65,8 @@ export class FoNavbarComponent implements OnInit, OnDestroy {
   }
 
   loadNotifications(): void {
-    if (this.authService.currentUser) {
-      this.notificationsService.getNotifications(this.authService.currentUser.id, 'freelancer')
+    if (this.authService.currentUser?.id) {
+      this.notificationsService.getNotifications(Number(this.authService.currentUser.id), 'freelancer')
         .subscribe(notifications => {
           this.notifications = notifications;
         });
@@ -88,8 +88,8 @@ export class FoNavbarComponent implements OnInit, OnDestroy {
   }
 
   markAllAsRead(): void {
-    if (this.authService.currentUser) {
-      this.notificationsService.markAllAsRead(this.authService.currentUser.id, 'freelancer')
+    if (this.authService.currentUser?.id) {
+      this.notificationsService.markAllAsRead(Number(this.authService.currentUser.id), 'freelancer')
         .subscribe(() => {
           this.notifications.forEach(n => n.is_read = true);
           this.unreadCount = 0;
@@ -119,7 +119,16 @@ export class FoNavbarComponent implements OnInit, OnDestroy {
   }
 
   goToDashboard(): void {
-    this.router.navigate(['/backoffice/dashboard']);
+    // Navigate to role-based dashboard
+    if (this.authService.isAdmin()) {
+      this.router.navigate(['/backoffice/dashboard']);
+    } else if (this.authService.isClient()) {
+      this.router.navigate(['/client/dashboard']);
+    } else if (this.authService.isFreelancer()) {
+      this.router.navigate(['/freelancer/dashboard']);
+    } else {
+      this.router.navigate(['/projects']);
+    }
   }
 
   logout(): void {

@@ -12,6 +12,7 @@ import { FoFooterComponent } from './layout/fo-footer/fo-footer.component';
 
 // Pages
 import { HomeComponent } from './home/home.component';
+import { ProjectsHomeComponent } from './projects-home/projects-home.component';
 import { CoursesResourcesComponent } from './courses-resources/courses-resources.component';
 import { EventsComponent } from './events/events.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
@@ -27,6 +28,7 @@ import { AvailableProjectsComponent } from './available-projects/available-proje
 import { ProjectDetailsComponent } from './project-details/project-details.component';
 import { MyApplicationsComponent } from './my-applications/my-applications.component';
 import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +36,7 @@ import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendati
     FoNavbarComponent,
     FoFooterComponent,
     HomeComponent,
+    ProjectsHomeComponent,
     CoursesResourcesComponent,
     EventsComponent,
     ProfileSettingsComponent,
@@ -48,7 +51,8 @@ import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendati
     AvailableProjectsComponent,
     ProjectDetailsComponent,
     MyApplicationsComponent,
-    AiRecommendationsComponent
+    AiRecommendationsComponent,
+    RegisterComponent
   ],
   imports: [
     CommonModule,

@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FoLayoutComponent } from './layout/fo-layout.component';
 import { HomeComponent } from './home/home.component';
+import { RegisterComponent } from './register/register.component';
+import { ProjectsHomeComponent } from './projects-home/projects-home.component';
 import { CoursesResourcesComponent } from './courses-resources/courses-resources.component';
 import { EventsComponent } from './events/events.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
@@ -22,10 +24,13 @@ const routes: Routes = [
     children: [
       { path: '', component: HomeComponent },
       { path: 'home', redirectTo: '', pathMatch: 'full' },
-      { path: 'courses-resources', component: CoursesResourcesComponent },
-      { path: 'events', component: EventsComponent },
+      { path: 'register', component: RegisterComponent },
       { path: 'projects', component: AvailableProjectsComponent },
       { path: 'projects/:id', component: ProjectDetailsComponent },
+      { path: 'courses-resources', component: CoursesResourcesComponent },
+      { path: 'events', component: EventsComponent },
+      { path: 'available-projects', redirectTo: 'projects', pathMatch: 'full' },
+      { path: 'available-projects/:id', redirectTo: 'projects/:id', pathMatch: 'full' },
       { path: 'my-applications', component: MyApplicationsComponent },
       { path: 'ai-recommendations', component: AiRecommendationsComponent },
       { path: 'profile-settings', component: ProfileSettingsComponent },

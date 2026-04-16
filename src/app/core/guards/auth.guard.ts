@@ -8,6 +8,7 @@ export class AdminGuard implements CanActivate {
   canActivate(): boolean {
     this.authService.checkAuth();
     if (this.authService.isAuthenticated && this.authService.isAdmin()) return true;
+    this.authService.setRedirectUrl(this.router.url);
     this.router.navigate(['/backoffice/login']);
     return false;
   }
@@ -19,6 +20,7 @@ export class ClientGuard implements CanActivate {
   canActivate(): boolean {
     this.authService.checkAuth();
     if (this.authService.isAuthenticated && this.authService.isClient()) return true;
+    this.authService.setRedirectUrl(this.router.url);
     this.router.navigate(['/backoffice/login']);
     return false;
   }
@@ -30,6 +32,7 @@ export class FreelancerGuard implements CanActivate {
   canActivate(): boolean {
     this.authService.checkAuth();
     if (this.authService.isAuthenticated && this.authService.isFreelancer()) return true;
+    this.authService.setRedirectUrl(this.router.url);
     this.router.navigate(['/backoffice/login']);
     return false;
   }
@@ -41,6 +44,7 @@ export class AuthGuard implements CanActivate {
   canActivate(): boolean {
     this.authService.checkAuth();
     if (this.authService.isAuthenticated) return true;
+    this.authService.setRedirectUrl(this.router.url);
     this.router.navigate(['/backoffice/login']);
     return false;
   }

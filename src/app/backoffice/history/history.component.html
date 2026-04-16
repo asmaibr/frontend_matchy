@@ -54,4 +54,14 @@
       </div>
     </div>
   </div>
+
+  <!-- Debug Info -->
+  <div style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px; font-size: 12px;">
+    <details>
+      <summary style="cursor: pointer; font-weight: bold;">Debug Info</summary>
+      <p>Total Notifications: {{ allNotifications.length }}</p>
+      <p>Date Groups: {{ getDateKeys().length }}</p>
+      <p>Current User ID: {{ authService.currentUser?.id }}</p>
+    </details>
+  </div>
 </div>

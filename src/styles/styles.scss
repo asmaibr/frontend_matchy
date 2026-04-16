@@ -9,6 +9,7 @@
   --accent: #00e5ff;
   --accent-secondary: #a855f7;
 
+  /* Frontoffice variables with both prefixed and non-prefixed versions */
   --fo-bg-primary: #0a0e27;
   --fo-bg-secondary: #111436;
   --fo-bg-card: #161b3d;
@@ -16,6 +17,15 @@
   --fo-text-primary: #ffffff;
   --fo-text-secondary: rgba(255,255,255,0.65);
   --fo-text-muted: rgba(255,255,255,0.35);
+
+  /* Non-prefixed versions for compatibility */
+  --bg-primary: #0a0e27;
+  --bg-secondary: #111436;
+  --card-bg: #161b3d;
+  --border: rgba(79, 110, 247, 0.2);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255,255,255,0.65);
+  --text-muted: rgba(255,255,255,0.35);
 
   --bo-bg-primary: #f4f6fb;
   --bo-bg-secondary: #ffffff;

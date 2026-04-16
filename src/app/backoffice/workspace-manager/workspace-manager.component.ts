@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { WorkspaceService, ChatMessage, TeamMember, WorkSubmission } from '../../frontoffice/services/workspace.service';
 import { MilestonesService } from '../../frontoffice/services/milestones.service';
 import { CompanyProjectsService } from '../../frontoffice/services/company-projects.service';
-import { AuthService } from '../../frontoffice/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ProjectMilestone } from '../../frontoffice/models/milestone.model';
 import { CompanyProject } from '../../frontoffice/models/project.model';
 import { Subscription } from 'rxjs';
@@ -129,9 +129,10 @@ export class WorkspaceManagerComponent implements OnInit, OnDestroy {
   sendMessage(): void {
     if (!this.newMessage.trim() || !this.selectedMilestone || !this.authService.currentUser) return;
 
+    const userId = Number(this.authService.currentUser.id);
     this.workspaceService.sendMessage(
       this.selectedMilestone.id,
-      this.authService.currentUser.id,
+      userId,
       this.authService.currentUser.name,
       'company',
       this.newMessage

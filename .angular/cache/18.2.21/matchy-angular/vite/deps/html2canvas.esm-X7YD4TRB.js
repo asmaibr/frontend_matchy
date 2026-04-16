@@ -7689,4 +7689,4 @@ html2canvas/dist/html2canvas.esm.js:
   PERFORMANCE OF THIS SOFTWARE.
   ***************************************************************************** *)
 */
-//# sourceMappingURL=html2canvas.esm-VN2TC25E.js.map
+//# sourceMappingURL=html2canvas.esm-X7YD4TRB.js.map

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NotificationsService } from '../../frontoffice/services/notifications.service';
-import { AuthService } from '../../frontoffice/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Notification } from '../../frontoffice/models/notification.model';
 
 @Component({
@@ -16,22 +16,29 @@ export class BoNotificationsComponent implements OnInit {
 
   constructor(
     private notificationsService: NotificationsService,
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    console.log('BoNotificationsComponent initialized');
+    console.log('Current user:', this.authService.currentUser);
     this.loadNotifications();
   }
 
   loadNotifications(): void {
-    if (this.authService.currentUser) {
-      this.notificationsService.getNotifications(this.authService.currentUser.id, 'company')
-        .subscribe(notifications => {
+    console.log('📢 Loading ALL notifications from database');
+    this.notificationsService.getAllNotifications()
+      .subscribe(
+        notifications => {
+          console.log('✅ All notifications loaded successfully:', notifications);
           this.notifications = notifications;
           this.applyFilter();
-        });
-    }
+        },
+        error => {
+          console.error('❌ Error loading all notifications:', error);
+        }
+      );
   }
 
   applyFilter(): void {
@@ -58,7 +65,8 @@ export class BoNotificationsComponent implements OnInit {
 
   markAllAsRead(): void {
     if (this.authService.currentUser) {
-      this.notificationsService.markAllAsRead(this.authService.currentUser.id, 'company')
+      const userId = Number(this.authService.currentUser.id);
+      this.notificationsService.markAllAsRead(userId, 'company')
         .subscribe(() => {
           this.notifications.forEach(n => n.is_read = true);
           this.applyFilter();

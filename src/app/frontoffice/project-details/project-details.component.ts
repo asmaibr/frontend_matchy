@@ -4,7 +4,7 @@ import { CompanyProject } from '../models/project.model';
 import { ProjectMilestone, MilestoneApplication } from '../models/milestone.model';
 import { CompanyProjectsService } from '../services/company-projects.service';
 import { MilestonesService } from '../services/milestones.service';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-project-details',
@@ -65,6 +65,7 @@ export class ProjectDetailsComponent implements OnInit {
   openApplicationModal(milestone: ProjectMilestone): void {
     if (!this.authService.isAuthenticated) {
       alert('Please login to apply for this milestone');
+      this.authService.setRedirectUrl(this.router.url);
       this.router.navigate(['/backoffice/login']);
       return;
     }
@@ -140,8 +141,17 @@ export class ProjectDetailsComponent implements OnInit {
   }
 
   async submitApplication(): Promise<void> {
+    console.log('🔍 submitApplication called');
+    console.log('🔍 Current User:', this.authService.currentUser);
+    console.log('🔍 Current User ID:', this.authService.currentUser?.id);
+    console.log('🔍 Current User ID (string):', String(this.authService.currentUser?.id));
+    console.log('🔍 Current User ID (number):', Number(this.authService.currentUser?.id));
+    
     if (!this.selectedMilestone || !this.project || !this.authService.currentUser) {
-      console.error('Missing required data for application submission');
+      console.error('❌ Missing required data for application submission');
+      console.error('selectedMilestone:', this.selectedMilestone);
+      console.error('project:', this.project);
+      console.error('currentUser:', this.authService.currentUser);
       return;
     }
 
@@ -162,16 +172,17 @@ export class ProjectDetailsComponent implements OnInit {
       const application: Omit<MilestoneApplication, 'id' | 'appliedAt' | 'status'> = {
         milestoneId: this.selectedMilestone.id,
         projectId: this.project.id,
-        freelancerId: this.authService.currentUser.id,
+        freelancerId: Number(this.authService.currentUser.id),
         freelancerName: this.authService.currentUser.name,
-        freelancerEmail: this.authService.currentUser.email,
+        freelancerEmail: this.authService.currentUser.email || '',
         motivationLetter: this.applicationForm.motivationLetter,
         yearsOfExperience: this.applicationForm.yearsOfExperience,
         cvUrl: cvUrl,
         proposedBudget: this.applicationForm.proposedBudget
       };
 
-      console.log('Submitting application:', application);
+      console.log('✅ Submitting application with freelancerId:', application.freelancerId);
+      console.log('✅ Submitting application:', application);
       this.milestonesService.submitApplication(application).subscribe(() => {
         // Refresh milestones to show updated count
         this.milestonesService.getMilestonesByProjectId(this.project!.id).subscribe(allMilestones => {

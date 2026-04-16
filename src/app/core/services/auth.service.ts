@@ -9,6 +9,7 @@ import { User, AuthResponse } from '../models/models';
 export class AuthService {
   private readonly TOKEN_KEY = 'matchy_token';
   private readonly USER_KEY  = 'matchy_user';
+  private readonly REDIRECT_KEY = 'matchy_redirect_url';
 
   // ✅ Direct backend URL for OAuth (bypasses Gateway)
   private readonly backendUrl = 'http://localhost:8081/api';
@@ -17,6 +18,18 @@ export class AuthService {
   isAuthenticated = false;
 
   constructor(private http: HttpClient, private router: Router) {}
+
+  setRedirectUrl(url: string): void {
+    localStorage.setItem(this.REDIRECT_KEY, url);
+  }
+
+  getRedirectUrl(): string | null {
+    return localStorage.getItem(this.REDIRECT_KEY);
+  }
+
+  clearRedirectUrl(): void {
+    localStorage.removeItem(this.REDIRECT_KEY);
+  }
 
   checkAuth(): void {
     const token = localStorage.getItem(this.TOKEN_KEY);

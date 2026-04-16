@@ -77,6 +77,8 @@ export class MilestonesService {
       years_of_experience: application.yearsOfExperience,
       proposed_budget: application.proposedBudget
     };
+    console.log('📤 MilestonesService sending payload:', payload);
+    console.log('📤 freelancer_id in payload:', payload.freelancer_id);
     return this.http.post(`${this.apiUrl}/applications`, payload);
   }
 

@@ -18,11 +18,11 @@ interface ProjectCard {
 }
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  selector: 'app-projects-home',
+  templateUrl: './projects-home.component.html',
+  styleUrls: ['./projects-home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class ProjectsHomeComponent implements OnInit {
 
   stats: StatCard[] = [
     { value: '500+', label: 'Freelancers' },
