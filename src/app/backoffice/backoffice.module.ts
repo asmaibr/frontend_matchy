@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { BackofficeRoutingModule } from './backoffice-routing.module';
 import { FrontofficeModule } from '../frontoffice/frontoffice.module';
+import { SharedModule } from '../shared/shared.module';
 
 // Layout
 import { BoLayoutComponent } from './layout/bo-layout.component';
@@ -41,6 +42,12 @@ import { BoNotificationsComponent } from './notifications/notifications.componen
 import { BoHistoryComponent } from './history/history.component';
 import { WorkspaceManagerComponent } from './workspace-manager/workspace-manager.component';
 
+// Events Modals and components
+import { RegistrationsComponent } from './registrations/registrations.component';
+import { CreateEventModalComponent } from './events/create-event-modal/create-event-modal.component';
+import { ViewEventModalComponent } from './events/view-event-modal/view-event-modal.component';
+import { EditEventModalComponent } from './events/edit-event-modal/edit-event-modal.component';
+
 // Wallet
 import { WalletAdminComponent } from './wallet/wallet.component';
 
@@ -74,7 +81,11 @@ import { WalletAdminComponent } from './wallet/wallet.component';
     ReviewApplicationsComponent,
     BoNotificationsComponent,
     BoHistoryComponent,
-    WorkspaceManagerComponent
+    WorkspaceManagerComponent,
+    RegistrationsComponent,
+    CreateEventModalComponent,
+    ViewEventModalComponent,
+    EditEventModalComponent
   ],
   imports: [
     CommonModule,
@@ -83,7 +94,8 @@ import { WalletAdminComponent } from './wallet/wallet.component';
     ReactiveFormsModule,
     HttpClientModule,
     BackofficeRoutingModule,
-    FrontofficeModule
+    FrontofficeModule,
+    SharedModule
   ]
 })
 export class BackofficeModule {}

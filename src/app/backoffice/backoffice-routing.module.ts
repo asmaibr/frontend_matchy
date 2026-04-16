@@ -11,6 +11,7 @@ import { BoProfileSettingsComponent } from './profile-settings/profile-settings.
 import { BoProjectsMilestonesComponent } from './projects-milestones/projects-milestones.component';
 import { BoSubscriptionManagementComponent } from './subscription-management/subscription-management.component';
 import { UserManagementComponent } from './user-management/user-management.component';
+import { RegistrationsComponent } from './registrations/registrations.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
@@ -48,6 +49,7 @@ const routes: Routes = [
       { path: 'categories', component: CategoriesComponent },
       { path: 'courses-resources', component: BoCoursesResourcesComponent },
       { path: 'events', component: BoEventsComponent },
+      { path: 'registrations', component: RegistrationsComponent },
       { path: 'profile-settings', component: BoProfileSettingsComponent },
       { path: 'projects-milestones', component: BoProjectsMilestonesComponent },
       { path: 'subscription-management', component: BoSubscriptionManagementComponent },

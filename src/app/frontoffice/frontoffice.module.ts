@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { FrontofficeRoutingModule } from './frontoffice-routing.module';
+import { SharedModule } from '../shared/shared.module';
 
 // Layout
 import { FoLayoutComponent } from './layout/fo-layout.component';
@@ -29,6 +30,8 @@ import { ProjectDetailsComponent } from './project-details/project-details.compo
 import { MyApplicationsComponent } from './my-applications/my-applications.component';
 import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
 import { RegisterComponent } from './register/register.component';
+import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
+import { RegistrationModalComponent } from './events/registration-modal/registration-modal.component';
 
 @NgModule({
   declarations: [
@@ -52,14 +55,17 @@ import { RegisterComponent } from './register/register.component';
     ProjectDetailsComponent,
     MyApplicationsComponent,
     AiRecommendationsComponent,
-    RegisterComponent
+    RegisterComponent,
+    ChatAssistantComponent,
+    RegistrationModalComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    FrontofficeRoutingModule
+    FrontofficeRoutingModule,
+    SharedModule
   ],
   exports: [
     SubscriptionPaymentComponent,

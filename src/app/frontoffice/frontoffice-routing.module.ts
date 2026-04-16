@@ -16,6 +16,7 @@ import { AvailableProjectsComponent } from './available-projects/available-proje
 import { ProjectDetailsComponent } from './project-details/project-details.component';
 import { MyApplicationsComponent } from './my-applications/my-applications.component';
 import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
+import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
 
 const routes: Routes = [
   {
@@ -33,6 +34,7 @@ const routes: Routes = [
       { path: 'available-projects/:id', redirectTo: 'projects/:id', pathMatch: 'full' },
       { path: 'my-applications', component: MyApplicationsComponent },
       { path: 'ai-recommendations', component: AiRecommendationsComponent },
+      { path: 'chat-assistant', component: ChatAssistantComponent },
       { path: 'profile-settings', component: ProfileSettingsComponent },
       { path: 'projects-milestones', component: ProjectsMilestonesComponent },
       { path: 'subscription-management', component: SubscriptionManagementComponent },

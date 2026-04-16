@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { EvenementService } from '../../core/services/evenement.service';
+import { Evenement, EvenementType } from '../../core/models/evenement.model';
+import { AuthService } from '../services/auth.service';
 
 interface Event {
   id: number;
@@ -7,7 +10,7 @@ interface Event {
   date: string;
   time: string;
   location: string;
-  type: 'webinar' | 'workshop' | 'meetup' | 'conference';
+  type: 'webinar' | 'workshop' | 'meetup' | 'conference' | 'certification' | 'training' | 'networking' | 'freelance';
   icon: string;
   color: string;
   attendees: number;
@@ -23,15 +26,22 @@ interface Event {
 })
 export class EventsComponent implements OnInit {
   activeFilter = 'all';
-  filters = ['all', 'webinar', 'workshop', 'meetup', 'conference'];
+  filters = ['all', 'certification', 'workshop', 'training', 'networking', 'freelance'];
+  events: Event[] = [];
+  loading = true;
+  
+  // Registration modal
+  showRegistrationModal = false;
+  selectedEventId = 0;
+  selectedEventTitle = '';
+  currentUserId: any;
 
-  events: Event[] = [
-    { id: 1, title: 'Freelance Tunisia Summit 2025', description: 'The biggest freelance event in Tunisia. Network, learn and grow with 500+ professionals.', date: '2025-03-15', time: '09:00', location: 'Tunis, TN', type: 'conference', icon: '🏆', color: '#f59e0b', attendees: 380, maxAttendees: 500, isFeatured: true, isOnline: false },
-    { id: 2, title: 'UX Design Masterclass', description: 'Live workshop with industry experts covering the latest UX research methods.', date: '2025-03-20', time: '14:00', location: 'Online', type: 'workshop', icon: '🎨', color: '#a855f7', attendees: 72, maxAttendees: 100, isFeatured: false, isOnline: true },
-    { id: 3, title: 'Freelancers Meetup Sfax', description: 'Monthly informal gathering of freelancers in Sfax. Share experiences and connections.', date: '2025-03-25', time: '18:00', location: 'Sfax, TN', type: 'meetup', icon: '☕', color: '#22c55e', attendees: 34, maxAttendees: 50, isFeatured: false, isOnline: false },
-    { id: 4, title: 'Client Acquisition Webinar', description: 'Learn proven strategies to find and retain high-paying clients as a freelancer.', date: '2025-04-02', time: '11:00', location: 'Online', type: 'webinar', icon: '📡', color: '#4f6ef7', attendees: 210, maxAttendees: 500, isFeatured: true, isOnline: true },
-    { id: 5, title: 'No-Code Tools Workshop', description: 'Master tools like Webflow, Bubble and Make to accelerate your freelance workflow.', date: '2025-04-10', time: '15:00', location: 'Online', type: 'workshop', icon: '⚡', color: '#06b6d4', attendees: 45, maxAttendees: 80, isFeatured: false, isOnline: true },
-  ];
+  constructor(
+    private evenementService: EvenementService,
+    private authService: AuthService
+  ) {
+    this.currentUserId = this.authService.currentUser?.id || 1;
+  }
 
   get filteredEvents(): Event[] {
     return this.events.filter(e => this.activeFilter === 'all' || e.type === this.activeFilter);
@@ -41,7 +51,79 @@ export class EventsComponent implements OnInit {
     return this.events.find(e => e.isFeatured);
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadEvents();
+  }
+
+  loadEvents(): void {
+    this.loading = true;
+    this.evenementService.getAllEvenements().subscribe({
+      next: (data: Evenement[]) => {
+        this.events = data.map((e, index) => this.mapToEvent(e, index));
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading events:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  mapToEvent(evenement: Evenement, index: number): Event {
+    const eventDate = new Date(evenement.date);
+    const typeMap: any = {
+      'CERTIFICATION': { type: 'certification', icon: '🎓', color: '#f59e0b' },
+      'WORKSHOP': { type: 'workshop', icon: '🎨', color: '#a855f7' },
+      'TRAINING': { type: 'training', icon: '📚', color: '#06b6d4' },
+      'NETWORKING': { type: 'networking', icon: '☕', color: '#22c55e' },
+      'FREELANCE_OPPORTUNITY': { type: 'freelance', icon: '💼', color: '#4f6ef7' },
+      'RECOMMENDATION': { type: 'webinar', icon: '⭐', color: '#ec4899' }
+    };
+
+    const mapped = typeMap[evenement.type] || { type: 'conference', icon: '📅', color: '#6366f1' };
+
+    return {
+      id: evenement.id || 0,
+      title: evenement.title,
+      description: evenement.description || '',
+      date: eventDate.toISOString().split('T')[0],
+      time: eventDate.toTimeString().substring(0, 5),
+      location: evenement.location || 'Online',
+      type: mapped.type,
+      icon: mapped.icon,
+      color: mapped.color,
+      attendees: evenement.currentParticipants || 0,
+      maxAttendees: evenement.maxParticipants || 100,
+      isFeatured: index === 0,
+      isOnline: evenement.location?.toLowerCase().includes('online') || false
+    };
+  }
+
+  participateInEvent(eventId: number): void {
+    this.evenementService.participateInEvenement(eventId).subscribe({
+      next: () => {
+        this.loadEvents();
+      },
+      error: (error) => {
+        console.error('Error participating in event:', error);
+        alert('Failed to register for event');
+      }
+    });
+  }
+
+  openRegistrationModal(event: Event): void {
+    this.selectedEventId = event.id;
+    this.selectedEventTitle = event.title;
+    this.showRegistrationModal = true;
+  }
+
+  closeRegistrationModal(): void {
+    this.showRegistrationModal = false;
+  }
+
+  onRegistrationSuccess(): void {
+    this.loadEvents(); // Reload events to update participant count
+  }
 
   getAttendancePercent(event: Event): number {
     return Math.round((event.attendees / event.maxAttendees) * 100);
